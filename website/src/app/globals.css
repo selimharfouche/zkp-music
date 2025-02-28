@@ -22,3 +22,21 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* src/app/globals.css */
+:root {
+  --bg-main: #f2f2f7;
+  --bg-card: #ffffff;
+  --text-primary: #000000;
+  --text-muted: #6c6c70;
+  --border-color: #d1d1d6;
+}
+
+[data-theme='dark'] {
+  --bg-main: #1c1c1e;
+  --bg-card: #2c2c2e;
+  --text-primary: #ffffff;
+  --text-muted: #86868b;
+  --border-color: #38383a;
+}
+
+/* You can use CSS variables for non-Tailwind styling */

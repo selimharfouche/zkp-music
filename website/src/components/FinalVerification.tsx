@@ -1,7 +1,7 @@
 // website/src/components/FinalVerification.tsx
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Piano from './Piano';
 import { REGISTRY_ABI, CONTRACT_ADDRESSES } from '../utils/abis';
@@ -12,6 +12,9 @@ interface FinalVerificationProps {
 }
 
 const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected }) => {
+  // Theme state
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  
   // Verification mode
   const [verificationMode, setVerificationMode] = useState<'melody' | 'hash'>('melody');
   
@@ -35,6 +38,46 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   // References
   const resultContainerRef = useRef<HTMLDivElement>(null);
   
+  // Theme-based color classes
+  const getThemeClasses = () => {
+    if (theme === 'dark') {
+      return {
+        mainBg: 'bg-[#1c1c1e]',
+        cardBg: 'bg-[#2c2c2e]',
+        inputBg: 'bg-[#3a3a3c]',
+        border: 'border-[#48484a]',
+        text: 'text-white',
+        mutedText: 'text-[#86868b]',
+        primary: 'bg-[#0a84ff]',
+        primaryHover: 'hover:bg-[#0070d8]',
+        accent: 'bg-[#3a3a3c]',
+        buttonText: 'text-white',
+        logBg: 'bg-[#0a0a0a]',
+        resultPanelBg: 'bg-black',
+        resultCardBg: 'bg-[#111]'
+      };
+    } else {
+      return {
+        mainBg: 'bg-[#f2f2f7]',
+        cardBg: 'bg-white',
+        inputBg: 'bg-[#f2f2f7]',
+        border: 'border-[#d1d1d6]',
+        text: 'text-black',
+        mutedText: 'text-[#6c6c70]',
+        primary: 'bg-[#007aff]',
+        primaryHover: 'hover:bg-[#0062cc]',
+        accent: 'bg-[#e5e5ea]',
+        buttonText: 'text-white',
+        logBg: 'bg-[#f2f2f7]',
+        resultPanelBg: 'bg-white',
+        resultCardBg: 'bg-[#f8f8f8]'
+      };
+    }
+  };
+  
+  // Get theme colors
+  const colors = getThemeClasses();
+  
   // Helper function to add logs
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -57,6 +100,12 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
     setIsRegistered(false);
     setShowResults(false);
     setErrorMessage('');
+  };
+  
+  // Toggle theme
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+    addLog(`Switched to ${theme === 'dark' ? 'light' : 'dark'} theme`);
   };
   
   // Compute hash from melody and salt
@@ -219,26 +268,45 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   };
   
   return (
-    <div className="bg-[#1c1c1e] text-white p-6 rounded-lg shadow-lg mb-20 relative">
-      <h2 className="text-2xl font-bold mb-6">Verify Melody Ownership</h2>
+    <div className={`${colors.mainBg} ${colors.text} p-6 rounded-lg shadow-lg mb-20 relative transition-colors duration-300`}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Verify Melody Ownership</h2>
+        
+        {/* Theme Toggle Button */}
+        <button 
+          onClick={toggleTheme}
+          className={`${colors.accent} p-2 rounded-full transition-colors cursor-pointer`}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+      </div>
       
       {/* Toggle Switch between verification methods */}
       <div className="relative flex justify-center mb-8">
         <div className="relative w-full max-w-md">
           {/* Toggle Background */}
-          <div className="bg-[#2c2c2e] h-14 rounded-xl p-1">
+          <div className={`${colors.cardBg} h-14 rounded-xl p-1`}>
             <div 
               className={`absolute h-12 rounded-lg transition-all duration-300 ease-in-out ${
                 verificationMode === 'melody' ? 'w-1/2 left-1' : 'w-1/2 left-[calc(50%)]'
-              } bg-[#3a3a3c]`}
+              } ${colors.accent}`}
             />
             
             {/* Toggle Buttons */}
             <div className="relative flex h-full">
               <button
                 onClick={() => setVerificationMode('melody')}
-                className={`flex-1 h-full rounded-lg flex items-center justify-center z-10 font-medium text-sm transition-colors ${
-                  verificationMode === 'melody' ? 'text-white' : 'text-[#86868b]'
+                className={`flex-1 h-full rounded-lg flex items-center justify-center z-10 font-medium text-sm transition-colors cursor-pointer ${
+                  verificationMode === 'melody' ? colors.text : colors.mutedText
                 }`}
               >
                 <span className="mr-2">🎹</span>
@@ -247,8 +315,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               
               <button
                 onClick={() => setVerificationMode('hash')}
-                className={`flex-1 h-full rounded-lg flex items-center justify-center z-10 font-medium text-sm transition-colors ${
-                  verificationMode === 'hash' ? 'text-white' : 'text-[#86868b]'
+                className={`flex-1 h-full rounded-lg flex items-center justify-center z-10 font-medium text-sm transition-colors cursor-pointer ${
+                  verificationMode === 'hash' ? colors.text : colors.mutedText
                 }`}
               >
                 <span className="mr-2">#️⃣</span>
@@ -260,14 +328,14 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       </div>
       
       {/* Verification Forms */}
-      <div className="bg-[#2c2c2e] p-5 rounded-xl mb-6 transition-all duration-300">
+      <div className={`${colors.cardBg} p-5 rounded-xl mb-6 transition-all duration-300`}>
         {/* Melody Verification Form */}
         {verificationMode === 'melody' && (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium mb-3">Select Your Melody</h3>
               <Piano onNotesChange={handleNotesChange} maxNotes={8} />
-              <p className="mt-2 text-sm text-[#86868b]">
+              <p className={`mt-2 text-sm ${colors.mutedText}`}>
                 Selected notes: {notes.length > 0 ? notes.join(', ') : 'None'} ({notes.length}/8)
               </p>
             </div>
@@ -281,7 +349,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                 id="saltInput"
                 value={salt}
                 onChange={(e) => setSalt(e.target.value)}
-                className="w-full px-3 py-2 bg-[#3a3a3c] border border-[#48484a] rounded-lg text-white"
+                className={`w-full px-3 py-2 ${colors.inputBg} border ${colors.border} rounded-lg ${colors.text} focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
                 placeholder="Enter the salt value you used when registering"
                 disabled={isProcessing}
               />
@@ -293,7 +361,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         {verificationMode === 'hash' && (
           <div>
             <h3 className="text-lg font-medium mb-3">Enter Melody Hash</h3>
-            <p className="text-[#86868b] mb-4 text-sm">
+            <p className={`${colors.mutedText} mb-4 text-sm`}>
               Enter the hash value of the melody you want to verify ownership for.
             </p>
             
@@ -301,7 +369,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               type="text"
               value={directHash}
               onChange={(e) => setDirectHash(e.target.value)}
-              className="w-full px-3 py-2 bg-[#3a3a3c] border border-[#48484a] rounded-lg text-white font-mono text-sm"
+              className={`w-full px-3 py-2 ${colors.inputBg} border ${colors.border} rounded-lg ${colors.text} font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
               placeholder="Paste the melody hash here"
               disabled={isProcessing}
             />
@@ -311,8 +379,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       
       {/* Error message */}
       {errorMessage && (
-        <div className="bg-[#3a3a3c] border-l-4 border-red-500 p-4 rounded-lg mb-6">
-          <p className="text-white">{errorMessage}</p>
+        <div className={`${colors.cardBg} border-l-4 border-red-500 p-4 rounded-lg mb-6`}>
+          <p className={colors.text}>{errorMessage}</p>
         </div>
       )}
       
@@ -320,10 +388,10 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       <button
         onClick={handleVerify}
         disabled={!canVerify()}
-        className={`w-full py-3 px-4 rounded-lg font-bold text-white mb-6 transition-all duration-200 ${
+        className={`w-full py-3 px-4 rounded-lg font-bold ${colors.buttonText} mb-6 transition-all duration-200 cursor-pointer ${
           !canVerify()
             ? 'bg-gray-600 cursor-not-allowed opacity-70'
-            : 'bg-blue-600 hover:bg-blue-700 shadow-lg'
+            : `${colors.primary} ${colors.primaryHover} shadow-lg`
         }`}
       >
         {isProcessing ? (
@@ -337,41 +405,41 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       </button>
       
       {/* Status bar */}
-      <div className="mb-6 flex items-center justify-between bg-[#2c2c2e] p-2 rounded-lg text-sm">
+      <div className={`mb-6 flex items-center justify-between ${colors.cardBg} p-2 rounded-lg text-sm`}>
         <div className="flex items-center">
           <div className={`w-3 h-3 rounded-full mr-2 ${isWalletConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className="text-[#86868b]">
+          <span className={colors.mutedText}>
             {isWalletConnected ? 'Wallet Connected' : 'Wallet Not Connected'}
           </span>
         </div>
         
         <button 
           onClick={() => setLogs([])}
-          className="text-xs text-[#0a84ff] hover:underline"
+          className="text-xs text-[#0a84ff] hover:underline cursor-pointer"
         >
           Clear Logs
         </button>
       </div>
       
       {/* Process Logs (collapsible) */}
-      <div className="bg-[#0a0a0a] rounded-lg border border-[#3a3a3c] overflow-hidden">
+      <div className={`${colors.logBg} rounded-lg border ${colors.border} overflow-hidden`}>
         <details>
-          <summary className="flex items-center justify-between p-3 cursor-pointer bg-[#0a0a0a] hover:bg-[#1a1a1a]">
+          <summary className={`flex items-center justify-between p-3 cursor-pointer ${colors.logBg} hover:bg-opacity-80`}>
             <h3 className="font-medium">Process Log</h3>
-            <span className="text-xs text-[#86868b]">{logs.length} entries</span>
+            <span className={`text-xs ${colors.mutedText}`}>{logs.length} entries</span>
           </summary>
           
           <div className="max-h-40 overflow-y-auto p-2">
             {logs.length > 0 ? (
               <div className="space-y-1">
                 {logs.map((log, i) => (
-                  <p key={i} className="text-xs font-mono text-[#86868b] border-b border-[#222] py-1">
+                  <p key={i} className={`text-xs font-mono ${colors.mutedText} border-b ${colors.border} py-1`}>
                     {log}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#86868b] p-2">No logs yet</p>
+              <p className={`text-xs ${colors.mutedText} p-2`}>No logs yet</p>
             )}
           </div>
         </details>
@@ -380,12 +448,12 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       {/* Fixed-position verification result panel */}
       {showResults && calculatedHash && (
         <div className="fixed inset-x-0 bottom-0 z-50" ref={resultContainerRef}>
-          <div className="max-w-4xl mx-auto p-6 bg-black border-t-4 border-blue-500 shadow-2xl">
+          <div className={`max-w-4xl mx-auto p-6 ${colors.resultPanelBg} border-t-4 border-blue-500 shadow-2xl`}>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">Verification Result</h3>
+              <h3 className={`text-xl font-bold ${colors.text}`}>Verification Result</h3>
               <button 
                 onClick={() => setShowResults(false)}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 rounded"
+                className={`${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} ${colors.text} px-3 py-1 rounded cursor-pointer`}
               >
                 Close
               </button>
@@ -393,9 +461,9 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="bg-[#111] p-4 rounded-lg mb-4">
+                <div className={`${colors.resultCardBg} p-4 rounded-lg mb-4`}>
                   <div className="mb-2">
-                    <span className="text-gray-400">Status:</span>
+                    <span className={colors.mutedText}>Status:</span>
                     <span className={`ml-2 font-bold ${isRegistered ? 'text-green-500' : 'text-yellow-500'}`}>
                       {isRegistered ? 'REGISTERED ✓' : 'NOT REGISTERED ✗'}
                     </span>
@@ -404,13 +472,13 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                   {isRegistered && (
                     <>
                       <div className="mb-2">
-                        <span className="text-gray-400">Owner:</span>
-                        <span className="ml-2 text-white">{formatAddress(ownerAddress)}</span>
+                        <span className={colors.mutedText}>Owner:</span>
+                        <span className={`ml-2 ${colors.text}`}>{formatAddress(ownerAddress)}</span>
                         <a
                           href={`https://sepolia.etherscan.io/address/${ownerAddress}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-2 text-blue-400 hover:underline text-sm"
+                          className="ml-2 text-blue-400 hover:underline text-sm cursor-pointer"
                         >
                           View on Etherscan
                         </a>
@@ -418,8 +486,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                       
                       {registrationTime && (
                         <div>
-                          <span className="text-gray-400">Registered:</span>
-                          <span className="ml-2 text-white">{registrationTime}</span>
+                          <span className={colors.mutedText}>Registered:</span>
+                          <span className={`ml-2 ${colors.text}`}>{registrationTime}</span>
                         </div>
                       )}
                     </>
@@ -428,9 +496,9 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               </div>
               
               <div>
-                <div className="bg-[#111] p-4 rounded-lg">
+                <div className={`${colors.resultCardBg} p-4 rounded-lg`}>
                   <div className="mb-2">
-                    <span className="text-gray-400">Hash:</span>
+                    <span className={colors.mutedText}>Hash:</span>
                   </div>
                   <div className="font-mono text-sm text-green-400 break-all">
                     {calculatedHash}
@@ -440,7 +508,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                       navigator.clipboard.writeText(calculatedHash);
                       addLog('Hash copied to clipboard');
                     }}
-                    className="mt-2 bg-[#333] hover:bg-[#444] text-white px-3 py-1 rounded text-sm"
+                    className={`mt-2 ${theme === 'dark' ? 'bg-[#333] hover:bg-[#444]' : 'bg-[#e5e5ea] hover:bg-[#d1d1d6]'} ${colors.text} px-3 py-1 rounded text-sm cursor-pointer`}
                   >
                     Copy Hash
                   </button>
