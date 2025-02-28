@@ -74,9 +74,9 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   // Render a consistent UI while the component is mounting
   if (!mounted) {
     return (
-      <div className="bg-black p-4 rounded-lg shadow mb-6 text-white">
+      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
         <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
-        <p className="text-gray-300">Initializing wallet connection...</p>
+        <p className="text-[#86868b]">Initializing wallet connection...</p>
       </div>
     );
   }
@@ -86,15 +86,15 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   
   if (!hasEthereum) {
     return (
-      <div className="bg-black p-4 rounded-lg shadow mb-6 text-white">
+      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
         <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
-        <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-800">
-          <p>No Ethereum wallet detected. Please install MetaMask to continue.</p>
+        <div className="p-4 bg-[#3a3a3c] border border-[#48484a] rounded-md">
+          <p className="text-white">No Ethereum wallet detected. Please install MetaMask to continue.</p>
           <a 
             href="https://metamask.io/download/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline mt-2 inline-block"
+            className="mt-2 inline-block text-[#0a84ff] hover:underline"
           >
             Download MetaMask
           </a>
@@ -104,25 +104,25 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   }
   
   return (
-    <div className="bg-black p-4 rounded-lg shadow mb-6 text-white">
+    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
       <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
       
       {error && (
-        <div className="p-3 bg-red-100 border border-red-300 rounded-md text-red-800 mb-4">
+        <div className="p-4 mb-4 bg-[#3a3a3c] border-l-4 border-red-500 rounded-md text-white">
           {error}
         </div>
       )}
       
       {account ? (
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-green-100 text-green-800 rounded-md">
+          <div className="p-2 bg-[#3a3a3c] text-white rounded-md">
             Connected: {formatAddress(account)}
           </div>
           <a
             href={`https://sepolia.etherscan.io/address/${account}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-[#0a84ff] hover:underline"
           >
             View on Etherscan
           </a>
@@ -132,8 +132,8 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
           onClick={handleConnect}
           disabled={connecting}
           className={`
-            px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+            px-4 py-2 bg-[#0a84ff] text-white rounded-md hover:bg-[#0070d8]
+            focus:outline-none focus:ring-2 focus:ring-[#0a84ff] focus:ring-opacity-50
             ${connecting ? 'opacity-75 cursor-not-allowed' : ''}
           `}
         >
@@ -141,7 +141,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
         </button>
       )}
       
-      <p className="mt-2 text-sm text-gray-300">
+      <p className="mt-3 text-[#86868b]">
         Connect your wallet to register and verify melodies.
       </p>
     </div>

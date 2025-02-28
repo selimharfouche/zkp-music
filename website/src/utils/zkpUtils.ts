@@ -1,8 +1,7 @@
 // website/src/utils/zkpUtils.ts
-import { BigNumber } from 'ethers';
-import { Proof } from './types';
+// Zero-knowledge proof utility functions for hashing and proof generation
 
-// We need to import snarkjs dynamically as it's not fully compatible with Next.js SSR
+// Dynamic imports of libraries
 let snarkjs: any;
 let circomlibjs: any;
 
@@ -30,6 +29,10 @@ export const calculateMelodyHash = async (melody: number[], salt: bigint): Promi
     const poseidon = await circomlibjs.buildPoseidon();
     console.log("Poseidon hasher loaded");
     
+    if (!poseidon) {
+      throw new Error("Failed to initialize Poseidon hasher");
+    }
+    
     // Prepare inputs (melody + salt)
     const hashInputs = [...melody.map(n => BigInt(n)), salt];
     console.log("Hash inputs prepared:", hashInputs.map(n => n.toString()));
@@ -38,9 +41,17 @@ export const calculateMelodyHash = async (melody: number[], salt: bigint): Promi
     const hashResult = poseidon(hashInputs);
     console.log("Raw hash result obtained");
     
+    if (!hashResult) {
+      throw new Error("Hash calculation failed");
+    }
+    
     // Convert to string
     const hash = poseidon.F.toString(hashResult);
     console.log("Final hash:", hash);
+    
+    if (!hash || hash.length === 0) {
+      throw new Error("Hash conversion to string failed");
+    }
     
     return hash;
   } catch (error) {
@@ -55,7 +66,6 @@ export const calculateMelodyHash = async (melody: number[], salt: bigint): Promi
 export const generateSalt = (): bigint => {
   if (typeof window === 'undefined') {
     // Fallback for server-side rendering
-    // This is just a placeholder - the real value will be generated client-side
     return BigInt("0x1234567890abcdef1234567890abcdef");
   }
   
@@ -80,7 +90,7 @@ export const generateProof = async (
   melody: number[], 
   salt: bigint, 
   melodyHash: string
-): Promise<Proof> => {
+): Promise<any> => {
   await loadLibraries();
   
   // Create input for the proof
