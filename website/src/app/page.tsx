@@ -5,8 +5,7 @@ import React, { useState } from 'react';
 import WalletConnect from '../components/WalletConnect';
 import MelodyRegistration from '../components/MelodyRegistration';
 import UserMelodies from '../components/UserMelodies';
-import MelodyVerification from '../components/MelodyVerification';
-import ComputeHashPanel from '../components/ComputeHashPanel';
+import FinalVerification from '../components/FinalVerification';
 
 export default function Home() {
   const [walletConnected, setWalletConnected] = useState(false);
@@ -46,9 +45,8 @@ export default function Home() {
             />
           </div>
           
-          <ComputeHashPanel />
-          
-          <MelodyVerification isWalletConnected={walletConnected} />
+          {/* Use our final verification component */}
+          <FinalVerification isWalletConnected={walletConnected} />
           
           <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white">
             <h2 className="text-2xl font-bold mb-4">About This Project</h2>

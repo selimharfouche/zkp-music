@@ -7,24 +7,21 @@ import { notesToMIDI, calculateMelodyHash } from '../utils/zkpUtils';
 
 const ComputeHashPanel = () => {
   const [notes, setNotes] = useState<string[]>([]);
-  const [salt, setSalt] = useState<string>('');
+  const [salt, setSalt] = useState<string>('123456789');  // Default value to make testing easier
   const [computedHash, setComputedHash] = useState<string | null>(null);
   const [isComputing, setIsComputing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showResult, setShowResult] = useState(false);
   
   const handleNotesChange = (newNotes: string[]) => {
     setNotes(newNotes);
     setComputedHash(null);
     setError(null);
-    setShowResult(false);
   };
   
   const handleSaltChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSalt(e.target.value);
     setComputedHash(null);
     setError(null);
-    setShowResult(false);
   };
   
   const computeHash = async () => {
@@ -49,23 +46,21 @@ const ComputeHashPanel = () => {
     setIsComputing(true);
     setError(null);
     setComputedHash(null);
-    setShowResult(false);
     
     try {
-      // Add visible progress
+      // Convert notes to MIDI
       console.log("Converting notes to MIDI...");
       const midiNotes = notesToMIDI(notes);
+      console.log("MIDI notes:", midiNotes);
       
-      // Simulate some processing time for UX
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      // Calculate hash
       console.log("Calculating hash with salt:", salt);
       const hash = await calculateMelodyHash(midiNotes, BigInt(salt));
       console.log("Hash calculated successfully:", hash);
       
-      // Set the computed hash and show the result
+      // Update state with the hash
       setComputedHash(hash);
-      setShowResult(true);
+      
     } catch (error: any) {
       console.error('Error computing hash:', error);
       setError(error.message || 'Failed to compute hash');
@@ -74,15 +69,15 @@ const ComputeHashPanel = () => {
     }
   };
   
-  // Debugging effect to log when hash changes
+  // Debug info about state changes
   useEffect(() => {
     if (computedHash) {
-      console.log("Hash state updated:", computedHash);
+      console.log("Hash state has been updated:", computedHash);
     }
   }, [computedHash]);
   
   return (
-    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white">
+    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white mb-20">
       <h2 className="text-2xl font-bold mb-4">Compute Melody Hash</h2>
       <p className="text-[#86868b] mb-4">
         Enter notes and a salt value to compute a hash without registering it.
@@ -130,35 +125,55 @@ const ComputeHashPanel = () => {
         ) : 'Compute Hash'}
       </button>
       
-      {/* Debug info */}
-      <div className="mt-2 text-xs text-[#86868b]">
+      {/* Current state info for debugging */}
+      <div className="mt-3 text-xs text-[#86868b]">
         <p>Notes selected: {notes.length}/8</p>
         <p>Salt entered: {salt ? "Yes" : "No"}</p>
-        <p>Computation triggered: {isComputing ? "Yes" : "No"}</p>
+        <p>Hash value exists: {computedHash ? "Yes" : "No"}</p>
       </div>
       
-      {/* Make sure the hash result is clearly visible */}
-      {showResult && computedHash && (
-        <div className="mt-4 p-4 bg-[#1c1c1e] border-2 border-[#0a84ff] rounded-lg">
-          <h3 className="font-bold mb-2 text-white">Computed Hash:</h3>
-          <div className="bg-[#2c2c2e] p-3 rounded font-mono break-all text-sm text-white">
-            {computedHash}
+      {/* Hash Result Section - IMPORTANT: Highly visible styling */}
+      {computedHash && (
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-black border-t-8 border-blue-500 z-50">
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold mb-2 text-white">Hash Result:</h3>
+            
+            <div className="bg-[#2c2c2e] p-4 rounded-lg mb-4 overflow-x-auto">
+              <p className="font-mono text-lg text-white break-all">{computedHash}</p>
+            </div>
+            
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(computedHash);
+                  alert("Hash copied!");
+                }}
+                className="px-4 py-2 bg-[#0a84ff] text-white rounded-lg"
+              >
+                Copy Hash
+              </button>
+              
+              <button
+                onClick={() => setComputedHash(null)}
+                className="px-4 py-2 bg-[#ff453a] text-white rounded-lg"
+              >
+                Close
+              </button>
+            </div>
           </div>
-          <p className="mt-2 text-[#86868b] text-sm">
-            This hash uniquely identifies your melody + salt combination.
-            You can use it to verify ownership in the system.
+        </div>
+      )}
+      
+      {/* Secondary Hash Display - always visible after the main content */}
+      {computedHash && (
+        <div className="mt-10 p-6 bg-[#1c1c1e] border-4 border-yellow-500 rounded-lg">
+          <h3 className="text-xl font-bold mb-2 text-white">Computed Hash (In-Page Display):</h3>
+          <div className="bg-black p-4 rounded-lg overflow-x-auto">
+            <p className="font-mono text-green-400 break-all">{computedHash}</p>
+          </div>
+          <p className="mt-2 text-white">
+            If you can see this text but not the hash above, please scroll down to see the fixed position result at the bottom of your screen.
           </p>
-          
-          {/* Add a copy button for convenience */}
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(computedHash);
-              alert('Hash copied to clipboard!');
-            }}
-            className="mt-2 px-3 py-1 bg-[#3a3a3c] hover:bg-[#48484a] text-white text-sm rounded"
-          >
-            Copy Hash
-          </button>
         </div>
       )}
     </div>
