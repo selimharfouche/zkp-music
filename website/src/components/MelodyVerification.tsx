@@ -1,7 +1,7 @@
 // website/src/components/MelodyVerification.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { REGISTRY_ABI, CONTRACT_ADDRESSES } from '../utils/abis';
 
@@ -18,6 +18,23 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
     registrationTime?: Date;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugMessages, setDebugMessages] = useState<string[]>([]);
+
+  // Function to add debug messages
+  const addDebug = (message: string) => {
+    console.log(`[DEBUG] ${message}`);
+    if (debugMode) {
+      setDebugMessages(prev => [...prev, `${new Date().toISOString().substr(11, 8)}: ${message}`]);
+    }
+  };
+
+  // Clear debug messages when not in debug mode
+  useEffect(() => {
+    if (!debugMode) {
+      setDebugMessages([]);
+    }
+  }, [debugMode]);
 
   const verifyOwnership = async () => {
     if (!melodyHash.trim()) {
@@ -27,14 +44,18 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
 
     setIsVerifying(true);
     setError(null);
-    setVerificationResult(null);
+    addDebug("Starting verification process");
 
     try {
       if (!window.ethereum) {
+        addDebug("No Ethereum wallet found");
         throw new Error('No Ethereum wallet found');
       }
 
+      addDebug("Connecting to provider");
       const provider = new ethers.providers.Web3Provider(window.ethereum);
+      
+      addDebug("Creating contract instance");
       const registryContract = new ethers.Contract(
         CONTRACT_ADDRESSES.REGISTRY,
         REGISTRY_ABI,
@@ -42,9 +63,12 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
       );
 
       // Fetch the owner of the melody
+      addDebug(`Querying contract for hash: ${melodyHash}`);
       const owner = await registryContract.melodyOwners(melodyHash);
+      addDebug(`Owner result: ${owner}`);
       
       if (owner === ethers.constants.AddressZero) {
+        addDebug("Melody not registered (zero address returned)");
         setVerificationResult({
           isVerified: false,
           owner: 'None - This melody is not registered'
@@ -53,17 +77,23 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
       }
 
       // Fetch the registration time
+      addDebug("Fetching registration timestamp");
       const timestamp = await registryContract.registrationTimes(melodyHash);
       const registrationTime = new Date(timestamp.toNumber() * 1000);
+      addDebug(`Registration time: ${registrationTime.toLocaleString()}`);
 
       setVerificationResult({
         isVerified: true,
         owner,
         registrationTime
       });
+      
+      addDebug("Verification completed successfully");
     } catch (err: any) {
       console.error('Error verifying melody:', err);
+      addDebug(`Error occurred: ${err.message || 'Unknown error'}`);
       setError(`Failed to verify melody: ${err.message || 'Unknown error'}`);
+      setVerificationResult(null);
     } finally {
       setIsVerifying(false);
     }
@@ -74,14 +104,23 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
   };
 
   return (
-    <div className="bg-black p-6 rounded-lg shadow-md text-white">
-      <h2 className="text-2xl font-bold mb-4 text-white">Verify Melody Ownership</h2>
-      <p className="text-gray-300 mb-4">
+    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-white">Verify Melody Ownership</h2>
+        <button 
+          onClick={() => setDebugMode(!debugMode)}
+          className="text-[#86868b] text-sm hover:text-white"
+        >
+          {debugMode ? "Hide Debug" : "Debug Mode"}
+        </button>
+      </div>
+      
+      <p className="text-[#86868b] mb-4">
         Enter a melody hash to check if it's registered and who owns it.
       </p>
 
       <div className="mb-4">
-        <label htmlFor="melodyHash" className="block text-sm font-medium text-white mb-1">
+        <label htmlFor="melodyHash" className="block text-sm font-medium text-white mb-2">
           Melody Hash
         </label>
         <input
@@ -89,7 +128,7 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
           id="melodyHash"
           value={melodyHash}
           onChange={(e) => setMelodyHash(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-700 rounded-md bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-4 py-2 border border-[#48484a] rounded-lg bg-[#3a3a3c] text-white focus:outline-none focus:ring-2 focus:ring-[#0a84ff] text-sm"
           placeholder="Enter the melody hash to verify"
           disabled={isVerifying}
         />
@@ -99,46 +138,56 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
         onClick={verifyOwnership}
         disabled={isVerifying || !isWalletConnected}
         className={`
-          px-4 py-2 rounded-md text-white font-bold
+          px-4 py-2 rounded-lg text-white font-medium
           ${isVerifying || !isWalletConnected
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700'}
-          transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
+            ? 'bg-[#86868b] cursor-not-allowed'
+            : 'bg-[#0a84ff] hover:bg-[#0070d8]'}
+          transition-colors focus:outline-none focus:ring-2 focus:ring-[#0a84ff]
         `}
       >
-        {isVerifying ? 'Verifying...' : 'Verify Ownership'}
+        {isVerifying ? (
+          <span className="flex items-center justify-center">
+            <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-white rounded-full"></span>
+            Verifying...
+          </span>
+        ) : 'Verify Ownership'}
       </button>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-md text-red-800">
+        <div className="mt-4 p-4 bg-[#3a3a3c] border-l-4 border-red-500 rounded-md text-white">
           {error}
         </div>
       )}
 
       {verificationResult && (
-        <div className={`mt-4 p-4 rounded-md border ${verificationResult.isVerified ? 'bg-green-50 border-green-300' : 'bg-yellow-50 border-yellow-300'}`}>
-          <h3 className="font-bold text-lg mb-2">Verification Result</h3>
+        <div className={`mt-4 p-4 rounded-lg border ${verificationResult.isVerified ? 'bg-[#2c2c2e] border-[#30d158]' : 'bg-[#2c2c2e] border-[#ffd60a]'}`}>
+          <h3 className="font-bold text-lg mb-2 text-white">Verification Result</h3>
           
           <div className="space-y-2">
             <div>
-              <span className="font-medium">Status:</span>{' '}
+              <span className="font-medium text-white">Status:</span>{' '}
               {verificationResult.isVerified ? (
-                <span className="text-green-700 font-bold">Registered ✓</span>
+                <span className="text-[#30d158] font-bold">Registered ✓</span>
               ) : (
-                <span className="text-yellow-700 font-bold">Not Registered ✗</span>
+                <span className="text-[#ffd60a] font-bold">Not Registered ✗</span>
               )}
+            </div>
+            
+            <div>
+              <span className="font-medium text-white">Hash:</span>{' '}
+              <span className="font-mono text-[#86868b] break-all">{melodyHash}</span>
             </div>
             
             {verificationResult.isVerified && (
               <>
                 <div>
-                  <span className="font-medium">Owner:</span>{' '}
-                  <span className="font-mono">{formatAddress(verificationResult.owner)}</span>
+                  <span className="font-medium text-white">Owner:</span>{' '}
+                  <span className="font-mono text-[#86868b]">{formatAddress(verificationResult.owner)}</span>
                   <a
                     href={`https://sepolia.etherscan.io/address/${verificationResult.owner}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 text-blue-600 hover:underline text-sm"
+                    className="ml-2 text-[#0a84ff] hover:underline text-sm"
                   >
                     View
                   </a>
@@ -146,12 +195,39 @@ const MelodyVerification: React.FC<MelodyVerificationProps> = ({ isWalletConnect
                 
                 {verificationResult.registrationTime && (
                   <div>
-                    <span className="font-medium">Registered on:</span>{' '}
-                    <span>{verificationResult.registrationTime.toLocaleString()}</span>
+                    <span className="font-medium text-white">Registered on:</span>{' '}
+                    <span className="text-[#86868b]">{verificationResult.registrationTime.toLocaleString()}</span>
                   </div>
                 )}
               </>
             )}
+          </div>
+        </div>
+      )}
+      
+      {debugMode && (
+        <div className="mt-4 p-4 bg-[#1c1c1e] border border-[#48484a] rounded-lg">
+          <h3 className="font-bold mb-2 text-white">Debug Info</h3>
+          <div className="text-[#86868b] text-sm font-mono">
+            <p>Wallet connected: {isWalletConnected ? 'Yes' : 'No'}</p>
+            <p>Verifying: {isVerifying ? 'Yes' : 'No'}</p>
+            <p>Hash submitted: {melodyHash || 'None'}</p>
+            <p>Registry contract address: {CONTRACT_ADDRESSES.REGISTRY}</p>
+            <p>Has verification result: {verificationResult ? 'Yes' : 'No'}</p>
+            <p>Error state: {error || 'None'}</p>
+            
+            <div className="mt-2 border-t border-[#48484a] pt-2">
+              <p className="font-bold">Log:</p>
+              {debugMessages.length > 0 ? (
+                <ul className="list-none p-0 m-0 overflow-auto max-h-40">
+                  {debugMessages.map((msg, i) => (
+                    <li key={i} className="py-1">{msg}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No debug messages yet</p>
+              )}
+            </div>
           </div>
         </div>
       )}

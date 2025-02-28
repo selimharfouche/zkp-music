@@ -100,7 +100,7 @@ export const getCurrentAccount = async (): Promise<string | null> => {
 /**
  * Registers a melody on the blockchain
  */
-export const registerMelody = async (proof: Proof, melodyHash: string): Promise<boolean> => {
+export const registerMelody = async (proof: Proof, melodyHash: string): Promise<ethers.ContractTransaction | boolean> => {
   if (typeof window === 'undefined') {
     console.error('Cannot register melody on server side');
     return false;
@@ -149,7 +149,8 @@ export const registerMelody = async (proof: Proof, melodyHash: string): Promise<
     const receipt = await tx.wait();
     console.log("Transaction mined:", receipt);
     
-    return true;
+    // Return the transaction itself so the caller can access details like the hash
+    return tx;
   } catch (error) {
     console.error('Error registering melody:', error);
     throw error;

@@ -6,6 +6,7 @@ import WalletConnect from '../components/WalletConnect';
 import MelodyRegistration from '../components/MelodyRegistration';
 import UserMelodies from '../components/UserMelodies';
 import MelodyVerification from '../components/MelodyVerification';
+import ComputeHashPanel from '../components/ComputeHashPanel';
 
 export default function Home() {
   const [walletConnected, setWalletConnected] = useState(false);
@@ -44,6 +45,8 @@ export default function Home() {
               refreshTrigger={refreshMelodies}
             />
           </div>
+          
+          <ComputeHashPanel />
           
           <MelodyVerification isWalletConnected={walletConnected} />
           

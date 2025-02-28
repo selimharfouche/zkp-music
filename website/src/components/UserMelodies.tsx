@@ -12,6 +12,7 @@ interface UserMelodiesProps {
 interface MelodyData {
   hash: string;
   registrationTime?: Date;
+  txHash?: string;
 }
 
 const UserMelodies: React.FC<UserMelodiesProps> = ({ 
@@ -44,11 +45,25 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
       setError(null);
       
       try {
+        // Get melodies from contract
         const melodyHashes = await getUserMelodies();
         
-        const formattedMelodies: MelodyData[] = melodyHashes.map(hash => ({
-          hash
-        }));
+        // Also load saved ownership data which contains transaction hashes
+        const savedMelodies = typeof window !== 'undefined' 
+          ? JSON.parse(localStorage.getItem('melody-zkp-ownership-data') || '[]') 
+          : [];
+        
+        // Match contract melodies with saved data to get transaction hashes
+        const formattedMelodies: MelodyData[] = melodyHashes.map(hash => {
+          // Find matching saved melody to get txHash
+          const savedMelody = savedMelodies.find((m: any) => m.hash === hash);
+          
+          return {
+            hash,
+            txHash: savedMelody?.txHash,
+            // We could add registration time from the contract if needed
+          };
+        });
         
         setMelodies(formattedMelodies);
       } catch (err: any) {
@@ -65,18 +80,18 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
   // If not mounted yet, render a loading state to avoid hydration issues
   if (!mounted) {
     return (
-      <div className="bg-black p-6 rounded-lg shadow-md text-white">
+      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white">
         <h2 className="text-2xl font-bold mb-4 text-white">Your Registered Melodies</h2>
-        <p className="text-gray-300">Loading...</p>
+        <p className="text-[#86868b]">Loading...</p>
       </div>
     );
   }
   
   if (!isWalletConnected) {
     return (
-      <div className="bg-black p-6 rounded-lg shadow-md text-white">
+      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white">
         <h2 className="text-2xl font-bold mb-4 text-white">Your Registered Melodies</h2>
-        <p className="text-gray-300">Connect your wallet to view your registered melodies.</p>
+        <p className="text-[#86868b]">Connect your wallet to view your registered melodies.</p>
       </div>
     );
   }
