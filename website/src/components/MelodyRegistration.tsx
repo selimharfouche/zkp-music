@@ -7,6 +7,7 @@ import OwnershipProofAlert from './OwnershipProofAlert';
 import { notesToMIDI, calculateMelodyHash, generateSalt, generateProof } from '../utils/zkpUtils';
 import { registerMelody } from '../utils/web3Utils';
 import { saveMelodyOwnership } from '../utils/storageUtils';
+import { useTheme } from '../context/ThemeContext';
 
 interface MelodyRegistrationProps {
   isWalletConnected: boolean;
@@ -17,6 +18,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
   isWalletConnected,
   onRegistrationSuccess
 }) => {
+  const { theme } = useTheme();
   const [notes, setNotes] = useState<string[]>([]);
   const [melodyName, setMelodyName] = useState('');
   const [currentSalt, setCurrentSalt] = useState<bigint | null>(null);
@@ -28,6 +30,42 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
   const [showOwnershipAlert, setShowOwnershipAlert] = useState(false);
   const [ownershipData, setOwnershipData] = useState<any>(null);
   
+  // Theme-based styles
+  const getThemeClasses = () => {
+    if (theme === 'dark') {
+      return {
+        bgCard: 'bg-[#2c2c2e]',
+        text: 'text-white',
+        mutedText: 'text-[#86868b]',
+        bgInput: 'bg-[#3a3a3c]',
+        bgProgress: 'bg-[#48484a]',
+        progressBar: 'bg-[#0a84ff]',
+        border: 'border-[#48484a]',
+        errorBg: 'bg-[#3a3a3c]',
+        successBg: 'bg-[#3a3a3c]',
+        buttonBg: 'bg-[#0a84ff]',
+        buttonHover: 'hover:bg-[#0070d8]'
+      };
+    } else {
+      return {
+        bgCard: 'bg-white',
+        text: 'text-black',
+        mutedText: 'text-gray-500',
+        bgInput: 'bg-gray-100',
+        bgProgress: 'bg-gray-200',
+        progressBar: 'bg-blue-500',
+        border: 'border-gray-200',
+        errorBg: 'bg-red-50',
+        successBg: 'bg-green-50',
+        buttonBg: 'bg-blue-500',
+        buttonHover: 'hover:bg-blue-600'
+      };
+    }
+  };
+  
+  const colors = getThemeClasses();
+  
+  // Handle notes change from piano
   const handleNotesChange = (newNotes: string[]) => {
     setNotes(newNotes);
     setError(null);
@@ -37,6 +75,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
     setCurrentSalt(null);
   };
   
+  // Register melody workflow
   const registerMelodyFlow = useCallback(async () => {
     // Validation checks
     if (!isWalletConnected) {
@@ -139,7 +178,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         
         // Show the ownership alert
         setShowOwnershipAlert(true);
-      } catch (txError) {
+      } catch (txError: any) {
         console.error("Transaction error:", txError);
         throw new Error(`Blockchain transaction failed: ${txError.message || 'Unknown error'}`);
       }
@@ -154,11 +193,11 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
   }, [notes, melodyName, isWalletConnected, onRegistrationSuccess]);
   
   return (
-    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg text-white">
-      <h2 className="text-2xl font-bold mb-4 text-white">Register a New Melody</h2>
+    <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
+      <h2 className="text-2xl font-bold mb-4">Register a New Melody</h2>
       
       <div className="mb-4">
-        <label htmlFor="melodyName" className="block text-sm font-medium text-white mb-2">
+        <label htmlFor="melodyName" className={`block text-sm font-medium ${colors.text} mb-2`}>
           Melody Name
         </label>
         <input
@@ -166,7 +205,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
           id="melodyName"
           value={melodyName}
           onChange={(e) => setMelodyName(e.target.value)}
-          className="w-full px-4 py-2 border border-[#48484a] rounded-lg bg-[#3a3a3c] text-white focus:outline-none focus:ring-2 focus:ring-[#0a84ff]"
+          className={`w-full px-4 py-2 border ${colors.border} rounded-lg ${colors.bgInput} ${colors.text} focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
           placeholder="Enter a name for your melody"
           disabled={isProcessing}
         />
@@ -175,32 +214,32 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
       <Piano onNotesChange={handleNotesChange} maxNotes={8} />
       
       {error && (
-        <div className="p-4 mb-4 bg-[#3a3a3c] border-l-4 border-red-500 rounded-md text-white">
+        <div className={`p-4 mb-4 ${colors.errorBg} border-l-4 border-red-500 rounded-md ${colors.text}`}>
           {error}
         </div>
       )}
       
       {/* Progress Indicator */}
       {(isProcessing) && statusMessage && (
-        <div className="mt-4 mb-4 p-4 bg-[#3a3a3c] border border-[#48484a] rounded-lg">
+        <div className={`mt-4 mb-4 p-4 ${colors.bgInput} border ${colors.border} rounded-lg`}>
           <div className="flex items-center">
             <div className="mr-3">
               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
             </div>
-            <div className="text-white font-medium">{statusMessage}</div>
+            <div className={colors.text + " font-medium"}>{statusMessage}</div>
           </div>
           
           {progressPercent > 0 && (
             <div className="mt-3">
-              <div className="w-full bg-[#48484a] rounded-full h-3">
+              <div className={`w-full ${colors.bgProgress} rounded-full h-3`}>
                 <div 
-                  className="bg-[#0a84ff] h-3 rounded-full transition-all duration-500 flex items-center justify-end"
+                  className={`${colors.progressBar} h-3 rounded-full transition-all duration-500 flex items-center justify-end`}
                   style={{ width: `${progressPercent}%` }}
                 >
                   <span className="px-2 text-xs text-white">{progressPercent}%</span>
                 </div>
               </div>
-              <div className="flex justify-between mt-1 text-xs text-[#86868b]">
+              <div className={`flex justify-between mt-1 text-xs ${colors.mutedText}`}>
                 <span>Start</span>
                 <span>Salt</span>
                 <span>Hash</span>
@@ -214,7 +253,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
       
       {/* Success Message (only when not processing) */}
       {!isProcessing && statusMessage && progressPercent === 100 && (
-        <div className="p-4 mb-4 bg-[#3a3a3c] border-l-4 border-green-500 rounded-md text-white">
+        <div className={`p-4 mb-4 ${colors.successBg} border-l-4 border-green-500 rounded-md ${colors.text}`}>
           {statusMessage}
         </div>
       )}
@@ -223,7 +262,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         <button
           onClick={registerMelodyFlow}
           disabled={isProcessing} 
-          className="w-full px-6 py-3 rounded-lg text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a84ff] bg-[#0a84ff] hover:bg-[#0070d8] transition-all duration-300 shadow-md"
+          className={`w-full px-6 py-3 rounded-lg ${colors.text} font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a84ff] ${colors.buttonBg} ${colors.buttonHover} transition-all duration-300 shadow-md cursor-pointer`}
         >
           {isProcessing ? (
             <span className="flex items-center justify-center">
@@ -234,7 +273,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         </button>
         
         {/* Debug info to see what's causing the button to be disabled */}
-        <div className="mt-2 p-3 bg-[#3a3a3c] rounded-lg text-xs text-[#86868b]">
+        <div className={`mt-2 p-3 ${colors.bgInput} rounded-lg text-xs ${colors.mutedText}`}>
           <div>Notes: {notes.length}/8 {notes.length === 8 ? "✅" : "❌"}</div>
           <div>Wallet connected: {isWalletConnected ? "✅" : "❌"}</div>
           <div>Melody name: {melodyName.trim() ? "✅" : "❌"}</div>
@@ -242,8 +281,8 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         </div>
       </div>
       
-      <div className="mt-6 text-sm text-[#86868b] bg-[#3a3a3c] p-4 rounded-lg">
-        <p className="font-medium mb-2 text-white">How it works:</p>
+      <div className={`mt-6 text-sm ${colors.mutedText} ${colors.bgInput} p-4 rounded-lg`}>
+        <p className={`font-medium mb-2 ${colors.text}`}>How it works:</p>
         <ol className="list-decimal ml-5 space-y-1">
           <li>Create an 8-note melody using the piano keyboard</li>
           <li>Enter a name for your melody</li>

@@ -3,12 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { connectWallet, getCurrentAccount } from '../utils/web3Utils';
+import { useTheme } from '../context/ThemeContext';
 
 interface WalletConnectProps {
   onConnect: (address: string) => void;
 }
 
 const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
+  const { theme } = useTheme();
   const [account, setAccount] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +21,33 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   useEffect(() => {
     setMounted(true);
   }, []);
+  
+  // Theme-based colors
+  const getThemeColors = () => {
+    if (theme === 'dark') {
+      return {
+        bgCard: 'bg-[#2c2c2e]',
+        text: 'text-white',
+        mutedText: 'text-[#86868b]',
+        bgAlert: 'bg-[#3a3a3c]',
+        border: 'border-[#48484a]',
+        bgButton: 'bg-[#0a84ff]',
+        hoverButton: 'hover:bg-[#0070d8]'
+      };
+    } else {
+      return {
+        bgCard: 'bg-white',
+        text: 'text-black',
+        mutedText: 'text-gray-500',
+        bgAlert: 'bg-gray-100',
+        border: 'border-gray-200',
+        bgButton: 'bg-blue-500',
+        hoverButton: 'hover:bg-blue-600'
+      };
+    }
+  };
+  
+  const colors = getThemeColors();
   
   // Check if the user is already connected
   useEffect(() => {
@@ -74,9 +103,9 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   // Render a consistent UI while the component is mounting
   if (!mounted) {
     return (
-      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
+      <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
         <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
-        <p className="text-[#86868b]">Initializing wallet connection...</p>
+        <p className={colors.mutedText}>Initializing wallet connection...</p>
       </div>
     );
   }
@@ -86,15 +115,15 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   
   if (!hasEthereum) {
     return (
-      <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
+      <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
         <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
-        <div className="p-4 bg-[#3a3a3c] border border-[#48484a] rounded-md">
-          <p className="text-white">No Ethereum wallet detected. Please install MetaMask to continue.</p>
+        <div className={`p-4 ${colors.bgAlert} border ${colors.border} rounded-md`}>
+          <p className={colors.text}>No Ethereum wallet detected. Please install MetaMask to continue.</p>
           <a 
             href="https://metamask.io/download/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="mt-2 inline-block text-[#0a84ff] hover:underline"
+            className="mt-2 inline-block text-[#0a84ff] hover:underline cursor-pointer"
           >
             Download MetaMask
           </a>
@@ -104,25 +133,25 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   }
   
   return (
-    <div className="bg-[#2c2c2e] p-6 rounded-lg shadow-lg mb-6 text-white">
+    <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
       <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
       
       {error && (
-        <div className="p-4 mb-4 bg-[#3a3a3c] border-l-4 border-red-500 rounded-md text-white">
+        <div className={`p-4 mb-4 ${colors.bgAlert} border-l-4 border-red-500 rounded-md ${colors.text}`}>
           {error}
         </div>
       )}
       
       {account ? (
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-[#3a3a3c] text-white rounded-md">
+          <div className={`p-2 ${colors.bgAlert} ${colors.text} rounded-md`}>
             Connected: {formatAddress(account)}
           </div>
           <a
             href={`https://sepolia.etherscan.io/address/${account}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#0a84ff] hover:underline"
+            className="text-[#0a84ff] hover:underline cursor-pointer"
           >
             View on Etherscan
           </a>
@@ -132,16 +161,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
           onClick={handleConnect}
           disabled={connecting}
           className={`
-            px-4 py-2 bg-[#0a84ff] text-white rounded-md hover:bg-[#0070d8]
+            px-4 py-2 ${colors.bgButton} text-white rounded-md ${colors.hoverButton}
             focus:outline-none focus:ring-2 focus:ring-[#0a84ff] focus:ring-opacity-50
-            ${connecting ? 'opacity-75 cursor-not-allowed' : ''}
+            ${connecting ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
           {connecting ? 'Connecting...' : 'Connect Wallet'}
         </button>
       )}
       
-      <p className="mt-3 text-[#86868b]">
+      <p className={`mt-3 ${colors.mutedText}`}>
         Connect your wallet to register and verify melodies.
       </p>
     </div>
