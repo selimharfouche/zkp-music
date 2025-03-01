@@ -3,6 +3,7 @@
 
 import './globals.css';
 import { ThemeProvider } from '../context/ThemeContext';
+import { LanguageProvider } from '../context/LanguageContext';
 
 export default function RootLayout({
   children,
@@ -12,9 +13,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

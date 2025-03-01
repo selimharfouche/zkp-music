@@ -7,10 +7,14 @@ import MelodyRegistration from '../components/MelodyRegistration';
 import UserMelodies from '../components/UserMelodies';
 import FinalVerification from '../components/FinalVerification';
 import ThemeSwitcher from '../components/ThemeSwitcher';
+import LanguageSelector from '../components/LanguageSelector';
+import ZkpExplanation from '../components/ZkpExplanation';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Home() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [walletConnected, setWalletConnected] = useState(false);
   const [refreshMelodies, setRefreshMelodies] = useState(0);
   
@@ -43,10 +47,13 @@ export default function Home() {
       <header className={`${colors.bgHeader} ${colors.text} py-6 border-b ${colors.borderColor} transition-colors duration-300`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Music ZKP System</h1>
-            <p className={`mt-2 ${colors.mutedText}`}>Register and verify your melodies with zero-knowledge proofs</p>
+            <h1 className="text-3xl font-bold">{t('app.title')}</h1>
+            <p className={`mt-2 ${colors.mutedText}`}>{t('app.subtitle')}</p>
           </div>
-          <ThemeSwitcher />
+          <div className="flex items-center space-x-4">
+            <LanguageSelector />
+            <ThemeSwitcher />
+          </div>
         </div>
       </header>
       
@@ -69,34 +76,35 @@ export default function Home() {
           <FinalVerification isWalletConnected={walletConnected} />
           
           <div className={`${colors.bgAbout} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
-            <h2 className="text-2xl font-bold mb-4">About This Project</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('about.title')}</h2>
             <div className="prose prose-invert">
               <p className={colors.mutedText}>
-                This decentralized application allows you to register ownership of musical melodies
-                without ever revealing the actual notes to anyone else.
+                {t('about.description')}
               </p>
               
-              <h3 className={colors.text}>How It Works</h3>
+              <h3 className={colors.text}>{t('about.how_it_works')}</h3>
               <ol className={`list-decimal ml-5 space-y-2 ${colors.mutedText}`}>
-                <li>You create a melody using the on-screen piano</li>
-                <li>The app creates a cryptographic hash of your melody along with a random salt</li>
-                <li>A zero-knowledge proof is generated that proves you know the melody without revealing the notes</li>
-                <li>This proof is verified on the blockchain, establishing your ownership</li>
+                <li>{t('about.step1')}</li>
+                <li>{t('about.step2')}</li>
+                <li>{t('about.step3')}</li>
+                <li>{t('about.step4')}</li>
               </ol>
               
-              <h3 className={colors.text}>Benefits</h3>
+              <h3 className={colors.text}>{t('about.benefits')}</h3>
               <ul className={`list-disc ml-5 space-y-1 ${colors.mutedText}`}>
-                <li>Establish verifiable ownership without exposing your creative work</li>
-                <li>Secure timestamped proof of your musical ideas</li>
-                <li>Protect against unauthorized copying while still being able to prove ownership</li>
+                <li>{t('about.benefit1')}</li>
+                <li>{t('about.benefit2')}</li>
+                <li>{t('about.benefit3')}</li>
               </ul>
               
               <p className={`mt-4 ${colors.mutedText}`}>
-                This project uses zero-knowledge proofs built with Circom, and smart contracts
-                deployed on the Sepolia testnet.
+                {t('about.tech')}
               </p>
             </div>
           </div>
+          
+          {/* ZKP Explanation Component */}
+          <ZkpExplanation />
         </div>
       </div>
       
@@ -110,4 +118,4 @@ export default function Home() {
       </footer>
     </main>
   );
-};
+}

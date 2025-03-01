@@ -1,8 +1,9 @@
-// website/src/components/Piano.tsx
+// src/components/Piano.tsx
 'use client';
 
 import React, { useState, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PianoProps {
   onNotesChange: (notes: string[]) => void;
@@ -11,6 +12,7 @@ interface PianoProps {
 
 const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
   
   // Notes layout (2 octaves)
@@ -83,7 +85,7 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
   return (
     <div className="mt-6 mb-8">
       <h3 className={`text-lg font-medium mb-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-        Create Your Melody ({selectedNotes.length}/{maxNotes} notes)
+        {t('register.create_melody')} ({selectedNotes.length}/{maxNotes} {t('register.notes')})
       </h3>
       
       <div className={`piano-container relative h-40 overflow-x-auto whitespace-nowrap ${theme === 'dark' ? 'bg-[#3a3a3c]' : 'bg-gray-100'} p-4 rounded-lg`}>
@@ -128,7 +130,7 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
           onClick={clearNotes}
           className="px-4 py-2 bg-[#ff453a] text-white rounded-lg hover:bg-[#d70015] transition-colors cursor-pointer"
         >
-          Clear All
+          {t('register.clear_all')}
         </button>
         
         <button
@@ -140,11 +142,11 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
               : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
           } text-white rounded-lg transition-colors`}
         >
-          Delete Last
+          {t('register.delete_last')}
         </button>
         
         <div className={`ml-4 ${theme === 'dark' ? 'text-[#86868b]' : 'text-gray-500'}`}>
-          Sequence: {selectedNotes.length > 0 ? selectedNotes.join(', ') : 'None'}
+          {t('register.sequence')}: {selectedNotes.length > 0 ? selectedNotes.join(', ') : t('register.none')}
         </div>
       </div>
     </div>

@@ -1,9 +1,10 @@
-// website/src/components/WalletConnect.tsx
+// src/components/WalletConnect.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { connectWallet, getCurrentAccount } from '../utils/web3Utils';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface WalletConnectProps {
   onConnect: (address: string) => void;
@@ -11,6 +12,7 @@ interface WalletConnectProps {
 
 const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [account, setAccount] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +106,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   if (!mounted) {
     return (
       <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
-        <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('wallet.title')}</h2>
         <p className={colors.mutedText}>Initializing wallet connection...</p>
       </div>
     );
@@ -116,16 +118,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   if (!hasEthereum) {
     return (
       <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
-        <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('wallet.title')}</h2>
         <div className={`p-4 ${colors.bgAlert} border ${colors.border} rounded-md`}>
-          <p className={colors.text}>No Ethereum wallet detected. Please install MetaMask to continue.</p>
+          <p className={colors.text}>{t('wallet.not_found')}</p>
           <a 
             href="https://metamask.io/download/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="mt-2 inline-block text-[#0a84ff] hover:underline cursor-pointer"
           >
-            Download MetaMask
+            {t('wallet.download')}
           </a>
         </div>
       </div>
@@ -134,7 +136,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   
   return (
     <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg mb-6 ${colors.text} transition-colors duration-300`}>
-      <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
+      <h2 className="text-xl font-semibold mb-4">{t('wallet.title')}</h2>
       
       {error && (
         <div className={`p-4 mb-4 ${colors.bgAlert} border-l-4 border-red-500 rounded-md ${colors.text}`}>
@@ -145,15 +147,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
       {account ? (
         <div className="flex items-center space-x-2">
           <div className={`p-2 ${colors.bgAlert} ${colors.text} rounded-md`}>
-            Connected: {formatAddress(account)}
+            {t('wallet.connected')}: {formatAddress(account)}
           </div>
-          <a
+          
+          <a 
             href={`https://sepolia.etherscan.io/address/${account}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#0a84ff] hover:underline cursor-pointer"
           >
-            View on Etherscan
+            {t('wallet.view')}
           </a>
         </div>
       ) : (
@@ -166,12 +169,12 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
             ${connecting ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
-          {connecting ? 'Connecting...' : 'Connect Wallet'}
+          {connecting ? t('wallet.connecting') : t('wallet.connect')}
         </button>
       )}
       
       <p className={`mt-3 ${colors.mutedText}`}>
-        Connect your wallet to register and verify melodies.
+        {t('wallet.description')}
       </p>
     </div>
   );
