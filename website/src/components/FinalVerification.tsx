@@ -1,4 +1,4 @@
-// website/src/components/FinalVerification.tsx
+// src/components/FinalVerification.tsx
 'use client';
 
 import React, { useState, useRef } from 'react';
@@ -7,6 +7,7 @@ import Piano from './Piano';
 import { REGISTRY_ABI, CONTRACT_ADDRESSES } from '../utils/abis';
 import { notesToMIDI, calculateMelodyHash } from '../utils/zkpUtils';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FinalVerificationProps {
   isWalletConnected: boolean;
@@ -15,6 +16,7 @@ interface FinalVerificationProps {
 const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected }) => {
   // Use the theme from context
   const { theme } = useTheme();
+  const { t } = useLanguage();
   
   // Verification mode
   const [verificationMode, setVerificationMode] = useState<'melody' | 'hash'>('melody');
@@ -106,12 +108,12 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   const computeHash = async (): Promise<string | null> => {
     // Validation
     if (notes.length !== 8) {
-      setErrorMessage('Please select exactly 8 notes for your melody');
+      setErrorMessage(t('verify.error_notes'));
       return null;
     }
     
     if (!salt.trim()) {
-      setErrorMessage('Please enter a salt value');
+      setErrorMessage(t('verify.error_salt'));
       return null;
     }
     
@@ -119,26 +121,26 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
     try {
       BigInt(salt);
     } catch (err) {
-      setErrorMessage('Salt must be a valid numeric value');
+      setErrorMessage(t('verify.error_salt_format'));
       return null;
     }
     
-    addLog('Computing hash from notes and salt...');
+    addLog(t('verify.computing_hash'));
     
     try {
       // Convert notes to MIDI
       const midiNotes = notesToMIDI(notes);
-      addLog(`Notes converted to MIDI: [${midiNotes.join(', ')}]`);
+      addLog(`${t('verify.notes_midi')}: [${midiNotes.join(', ')}]`);
       
       // Calculate hash
       const hash = await calculateMelodyHash(midiNotes, BigInt(salt));
-      addLog(`Hash calculated: ${hash}`);
+      addLog(`${t('verify.hash_calculated')}: ${hash}`);
       
       // Update state with calculated hash
       setCalculatedHash(hash);
       return hash;
     } catch (error: any) {
-      const errorMsg = `Hash calculation error: ${error.message || 'Unknown error'}`;
+      const errorMsg = `${t('verify.hash_error')}: ${error.message || t('verify.unknown_error')}`;
       setErrorMessage(errorMsg);
       addLog(errorMsg);
       return null;
@@ -148,21 +150,21 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   // Verify hash ownership on chain
   const verifyOnChain = async (hash: string) => {
     if (!hash) {
-      setErrorMessage('No hash provided for verification');
+      setErrorMessage(t('verify.no_hash'));
       return;
     }
     
-    addLog(`Verifying ownership for hash: ${hash}`);
+    addLog(`${t('verify.verifying_ownership')}: ${hash}`);
     
     try {
       if (!window.ethereum) {
-        throw new Error('No Ethereum wallet found. Please install MetaMask.');
+        throw new Error(t('verify.no_wallet'));
       }
       
-      addLog('Connecting to provider...');
+      addLog(t('verify.connecting'));
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       
-      addLog('Creating contract instance...');
+      addLog(t('verify.creating_contract'));
       const registryContract = new ethers.Contract(
         CONTRACT_ADDRESSES.REGISTRY,
         REGISTRY_ABI,
@@ -170,9 +172,9 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       );
       
       // Query melody owner
-      addLog('Querying contract for owner...');
+      addLog(t('verify.querying_owner'));
       const owner = await registryContract.melodyOwners(hash);
-      addLog(`Owner address: ${owner}`);
+      addLog(`${t('verify.owner_address')}: ${owner}`);
       
       // Check if registered (owner is not zero address)
       const registered = owner !== ethers.constants.AddressZero;
@@ -181,14 +183,14 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       
       if (registered) {
         // Get registration time
-        addLog('Fetching registration timestamp...');
+        addLog(t('verify.fetching_timestamp'));
         const timestamp = await registryContract.registrationTimes(hash);
         const date = new Date(timestamp.toNumber() * 1000);
         setRegistrationTime(date.toLocaleString());
-        addLog(`Registration time: ${date.toLocaleString()}`);
+        addLog(`${t('verify.registration_time')}: ${date.toLocaleString()}`);
       } else {
         setRegistrationTime('');
-        addLog('Melody is not registered');
+        addLog(t('verify.not_registered'));
       }
       
       // Show results
@@ -200,7 +202,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       }
       
     } catch (error: any) {
-      const errorMsg = `Verification error: ${error.message || 'Unknown error'}`;
+      const errorMsg = `${t('verify.verification_error')}: ${error.message || t('verify.unknown_error')}`;
       setErrorMessage(errorMsg);
       addLog(errorMsg);
     }
@@ -219,16 +221,16 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       if (verificationMode === 'hash') {
         // Use direct hash
         if (!directHash.trim()) {
-          setErrorMessage('Please enter a hash to verify');
+          setErrorMessage(t('verify.error_no_hash'));
           setIsProcessing(false);
           return;
         }
-        addLog('Using provided hash for verification');
+        addLog(t('verify.using_provided_hash'));
         hashToVerify = directHash.trim();
         setCalculatedHash(hashToVerify);
       } else {
         // Compute hash from notes and salt
-        addLog('Computing hash from melody and salt first');
+        addLog(t('verify.computing_from_melody'));
         hashToVerify = await computeHash();
       }
       
@@ -236,8 +238,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         await verifyOnChain(hashToVerify);
       }
     } catch (error: any) {
-      setErrorMessage(`Verification failed: ${error.message || 'Unknown error'}`);
-      addLog(`Error: ${error.message || 'Unknown error'}`);
+      setErrorMessage(`${t('verify.verification_failed')}: ${error.message || t('verify.unknown_error')}`);
+      addLog(`${t('verify.error')}: ${error.message || t('verify.unknown_error')}`);
     } finally {
       setIsProcessing(false);
     }
@@ -245,7 +247,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   
   // Format address for display
   const formatAddress = (address: string): string => {
-    if (!address || address === ethers.constants.AddressZero) return 'None';
+    if (!address || address === ethers.constants.AddressZero) return t('verify.none');
     return `${address.substring(0, 8)}...${address.substring(address.length - 6)}`;
   };
 
@@ -263,7 +265,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
   
   return (
     <div className={`${colors.mainBg} ${colors.text} p-6 rounded-lg shadow-lg mb-20 relative transition-colors duration-300`}>
-      <h2 className="text-2xl font-bold mb-6">Verify Melody Ownership</h2>
+      <h2 className="text-2xl font-bold mb-6">{t('verify.title')}</h2>
       
       {/* Toggle Switch between verification methods */}
       <div className="relative flex justify-center mb-8">
@@ -285,7 +287,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                 }`}
               >
                 <span className="mr-2">🎹</span>
-                Verify with Melody
+                {t('verify.melody')}
               </button>
               
               <button
@@ -295,7 +297,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                 }`}
               >
                 <span className="mr-2">#️⃣</span>
-                Verify with Hash
+                {t('verify.hash')}
               </button>
             </div>
           </div>
@@ -308,16 +310,16 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         {verificationMode === 'melody' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium mb-3">Select Your Melody</h3>
+              <h3 className="text-lg font-medium mb-3">{t('verify.select_melody')}</h3>
               <Piano onNotesChange={handleNotesChange} maxNotes={8} />
               <p className={`mt-2 text-sm ${colors.mutedText}`}>
-                Selected notes: {notes.length > 0 ? notes.join(', ') : 'None'} ({notes.length}/8)
+                {t('register.selected_notes')}: {notes.length > 0 ? notes.join(', ') : t('register.none')} ({notes.length}/8)
               </p>
             </div>
             
             <div>
               <label htmlFor="saltInput" className="block text-sm font-medium mb-2">
-                Salt Value (used during registration)
+                {t('verify.salt_input')}
               </label>
               <input
                 type="text"
@@ -325,7 +327,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                 value={salt}
                 onChange={(e) => setSalt(e.target.value)}
                 className={`w-full px-3 py-2 ${colors.inputBg} border ${colors.border} rounded-lg ${colors.text} focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
-                placeholder="Enter the salt value you used when registering"
+                placeholder={t('verify.salt_placeholder')}
                 disabled={isProcessing}
               />
             </div>
@@ -335,9 +337,9 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         {/* Hash Verification Form */}
         {verificationMode === 'hash' && (
           <div>
-            <h3 className="text-lg font-medium mb-3">Enter Melody Hash</h3>
+            <h3 className="text-lg font-medium mb-3">{t('verify.hash_input')}</h3>
             <p className={`${colors.mutedText} mb-4 text-sm`}>
-              Enter the hash value of the melody you want to verify ownership for.
+              {t('verify.hash_description')}
             </p>
             
             <input
@@ -345,7 +347,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               value={directHash}
               onChange={(e) => setDirectHash(e.target.value)}
               className={`w-full px-3 py-2 ${colors.inputBg} border ${colors.border} rounded-lg ${colors.text} font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
-              placeholder="Paste the melody hash here"
+              placeholder={t('verify.hash_placeholder')}
               disabled={isProcessing}
             />
           </div>
@@ -372,10 +374,10 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         {isProcessing ? (
           <span className="flex items-center justify-center">
             <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-white rounded-full"></span>
-            {verificationMode === 'melody' ? 'Computing Hash & Verifying...' : 'Verifying...'}
+            {verificationMode === 'melody' ? t('verify.computing') : t('verify.processing')}
           </span>
         ) : (
-          'Verify Ownership'
+          t('verify.button')
         )}
       </button>
       
@@ -384,7 +386,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         <div className="flex items-center">
           <div className={`w-3 h-3 rounded-full mr-2 ${isWalletConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
           <span className={colors.mutedText}>
-            {isWalletConnected ? 'Wallet Connected' : 'Wallet Not Connected'}
+            {isWalletConnected ? t('verify.wallet_connected') : t('verify.wallet_not_connected')}
           </span>
         </div>
         
@@ -392,7 +394,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
           onClick={() => setLogs([])}
           className="text-xs text-[#0a84ff] hover:underline cursor-pointer"
         >
-          Clear Logs
+          {t('verify.clear_logs')}
         </button>
       </div>
       
@@ -400,8 +402,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
       <div className={`${colors.logBg} rounded-lg border ${colors.border} overflow-hidden`}>
         <details>
           <summary className={`flex items-center justify-between p-3 cursor-pointer ${colors.logBg} hover:bg-opacity-80`}>
-            <h3 className="font-medium">Process Log</h3>
-            <span className={`text-xs ${colors.mutedText}`}>{logs.length} entries</span>
+            <h3 className="font-medium">{t('verify.process_log')}</h3>
+            <span className={`text-xs ${colors.mutedText}`}>{logs.length} {t('verify.entries')}</span>
           </summary>
           
           <div className="max-h-40 overflow-y-auto p-2">
@@ -414,7 +416,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                 ))}
               </div>
             ) : (
-              <p className={`text-xs ${colors.mutedText} p-2`}>No logs yet</p>
+              <p className={`text-xs ${colors.mutedText} p-2`}>{t('verify.no_logs')}</p>
             )}
           </div>
         </details>
@@ -425,12 +427,12 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         <div className="fixed inset-x-0 bottom-0 z-50" ref={resultContainerRef}>
           <div className={`max-w-4xl mx-auto p-6 ${colors.resultPanelBg} border-t-4 border-blue-500 shadow-2xl`}>
             <div className="flex justify-between items-center mb-4">
-              <h3 className={`text-xl font-bold ${colors.text}`}>Verification Result</h3>
+              <h3 className={`text-xl font-bold ${colors.text}`}>{t('verify.result')}</h3>
               <button 
                 onClick={() => setShowResults(false)}
                 className={`${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} ${colors.text} px-3 py-1 rounded cursor-pointer`}
               >
-                Close
+                {t('verify.close')}
               </button>
             </div>
             
@@ -438,16 +440,16 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               <div>
                 <div className={`${colors.resultCardBg} p-4 rounded-lg mb-4`}>
                   <div className="mb-2">
-                    <span className={colors.mutedText}>Status:</span>
+                    <span className={colors.mutedText}>{t('verify.status')}:</span>
                     <span className={`ml-2 font-bold ${isRegistered ? 'text-green-500' : 'text-yellow-500'}`}>
-                      {isRegistered ? 'REGISTERED ✓' : 'NOT REGISTERED ✗'}
+                      {isRegistered ? t('verify.registered') : t('verify.not_registered')}
                     </span>
                   </div>
                   
                   {isRegistered && (
                     <>
                       <div className="mb-2">
-                        <span className={colors.mutedText}>Owner:</span>
+                        <span className={colors.mutedText}>{t('verify.owner')}:</span>
                         <span className={`ml-2 ${colors.text}`}>{formatAddress(ownerAddress)}</span>
                         <a
                           href={`https://sepolia.etherscan.io/address/${ownerAddress}`}
@@ -455,13 +457,13 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                           rel="noopener noreferrer"
                           className="ml-2 text-blue-400 hover:underline text-sm cursor-pointer"
                         >
-                          View on Etherscan
+                          {t('verify.view_on_etherscan')}
                         </a>
                       </div>
                       
                       {registrationTime && (
                         <div>
-                          <span className={colors.mutedText}>Registered:</span>
+                          <span className={colors.mutedText}>{t('verify.registered_on')}:</span>
                           <span className={`ml-2 ${colors.text}`}>{registrationTime}</span>
                         </div>
                       )}
@@ -473,7 +475,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
               <div>
                 <div className={`${colors.resultCardBg} p-4 rounded-lg`}>
                   <div className="mb-2">
-                    <span className={colors.mutedText}>Hash:</span>
+                    <span className={colors.mutedText}>{t('verify.hash')}:</span>
                   </div>
                   <div className="font-mono text-sm text-green-400 break-all">
                     {calculatedHash}
@@ -481,11 +483,11 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(calculatedHash);
-                      addLog('Hash copied to clipboard');
+                      addLog(t('verify.hash_copied'));
                     }}
                     className={`mt-2 ${theme === 'dark' ? 'bg-[#333] hover:bg-[#444]' : 'bg-[#e5e5ea] hover:bg-[#d1d1d6]'} ${colors.text} px-3 py-1 rounded text-sm cursor-pointer`}
                   >
-                    Copy Hash
+                    {t('verify.copy_hash')}
                   </button>
                 </div>
               </div>

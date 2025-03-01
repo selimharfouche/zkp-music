@@ -1,9 +1,10 @@
-// website/src/components/UserMelodies.tsx
+// src/components/UserMelodies.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { getUserMelodies } from '../utils/web3Utils';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface MelodyData {
   hash: string;
@@ -21,6 +22,7 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
   refreshTrigger = 0
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [melodies, setMelodies] = useState<MelodyData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,8 +108,8 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
   if (!mounted) {
     return (
       <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
-        <h2 className="text-2xl font-bold mb-4">Your Registered Melodies</h2>
-        <p className={colors.mutedText}>Loading...</p>
+        <h2 className="text-2xl font-bold mb-4">{t('melodies.title')}</h2>
+        <p className={colors.mutedText}>{t('melodies.loading')}</p>
       </div>
     );
   }
@@ -115,15 +117,15 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
   if (!isWalletConnected) {
     return (
       <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
-        <h2 className="text-2xl font-bold mb-4">Your Registered Melodies</h2>
-        <p className={colors.mutedText}>Connect your wallet to view your registered melodies.</p>
+        <h2 className="text-2xl font-bold mb-4">{t('melodies.title')}</h2>
+        <p className={colors.mutedText}>{t('melodies.connect_wallet')}</p>
       </div>
     );
   }
   
   return (
     <div className={`${colors.bgCard} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
-      <h2 className="text-2xl font-bold mb-4">Your Registered Melodies</h2>
+      <h2 className="text-2xl font-bold mb-4">{t('melodies.title')}</h2>
       
       {error && (
         <div className={`p-4 mb-4 ${colors.bgItem} border-l-4 border-red-500 rounded-md ${colors.text}`}>
@@ -133,23 +135,23 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
       
       {isLoading ? (
         <div className="flex justify-center p-8">
-          <div className={`animate-pulse ${colors.mutedText}`}>Loading your melodies...</div>
+          <div className={`animate-pulse ${colors.mutedText}`}>{t('melodies.loading')}</div>
         </div>
       ) : (
         <>
           {melodies.length === 0 ? (
-            <p className={colors.mutedText}>You haven't registered any melodies yet.</p>
+            <p className={colors.mutedText}>{t('melodies.none')}</p>
           ) : (
             <div className="space-y-4">
               {melodies.map((melody, index) => (
                 <div key={index} className={`p-4 border ${colors.border} rounded-lg ${colors.bgItem}`}>
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
                     <div>
-                      <h3 className={`font-medium ${colors.text}`}>Melody #{index + 1}</h3>
-                      <p className={`text-sm ${colors.mutedText} break-all mt-1`}>Hash: {melody.hash}</p>
+                      <h3 className={`font-medium ${colors.text}`}>{t('melodies.melody_number')}{index + 1}</h3>
+                      <p className={`text-sm ${colors.mutedText} break-all mt-1`}>{t('melodies.hash')}: {melody.hash}</p>
                       {melody.registrationTime && (
                         <p className={`text-sm ${colors.mutedText} mt-1`}>
-                          Registered on: {melody.registrationTime.toLocaleString()}
+                          {t('melodies.registered_on')}: {melody.registrationTime.toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -161,11 +163,11 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
                           rel="noopener noreferrer"
                           className="text-[#0a84ff] hover:underline text-sm font-medium cursor-pointer"
                         >
-                          View Transaction
+                          {t('melodies.view_transaction')}
                         </a>
                       ) : (
                         <span className={`${colors.mutedText} text-sm`}>
-                          Transaction data not available
+                          {t('melodies.no_transaction')}
                         </span>
                       )}
                     </div>

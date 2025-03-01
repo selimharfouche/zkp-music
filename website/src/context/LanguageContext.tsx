@@ -87,6 +87,44 @@ const translations: Record<Language, Record<string, string>> = {
     'verify.not_registered': 'Not Registered ✗',
     'verify.owner': 'Owner',
     'verify.registered_on': 'Registered on',
+    'verify.wallet_connected': 'Wallet Connected',
+    'verify.wallet_not_connected': 'Wallet Not Connected',
+    'verify.clear_logs': 'Clear Logs',
+    'verify.process_log': 'Process Log',
+    'verify.entries': 'entries',
+    'verify.no_logs': 'No logs yet',
+    'verify.close': 'Close',
+    'verify.hash': 'Hash',
+    'verify.copy_hash': 'Copy Hash',
+    'verify.view_on_etherscan': 'View on Etherscan',
+    'verify.none': 'None',
+    'verify.error_notes': 'Please select exactly 8 notes for your melody',
+    'verify.error_salt': 'Please enter a salt value',
+    'verify.error_salt_format': 'Salt must be a valid numeric value',
+    'verify.computing_hash': 'Computing hash from notes and salt...',
+    'verify.notes_midi': 'Notes converted to MIDI',
+    'verify.hash_calculated': 'Hash calculated',
+    'verify.hash_error': 'Hash calculation error',
+    'verify.unknown_error': 'Unknown error',
+    'verify.no_hash': 'No hash provided for verification',
+    'verify.verifying_ownership': 'Verifying ownership for hash',
+    'verify.no_wallet': 'No Ethereum wallet found. Please install MetaMask.',
+    'verify.connecting': 'Connecting to provider...',
+    'verify.creating_contract': 'Creating contract instance...',
+    'verify.querying_owner': 'Querying contract for owner...',
+    'verify.owner_address': 'Owner address',
+    'verify.fetching_timestamp': 'Fetching registration timestamp...',
+    'verify.registration_time': 'Registration time',
+    'verify.not_registered': 'Melody is not registered',
+    'verify.verification_error': 'Verification error',
+    'verify.error_no_hash': 'Please enter a hash to verify',
+    'verify.using_provided_hash': 'Using provided hash for verification',
+    'verify.computing_from_melody': 'Computing hash from melody and salt first',
+    'verify.verification_failed': 'Verification failed',
+    'verify.error': 'Error',
+    'verify.hash_copied': 'Hash copied to clipboard',
+    'verify.salt_placeholder': 'Enter the salt value you used when registering',
+    'verify.hash_placeholder': 'Paste the melody hash here',
     
     // About section
     'about.title': 'About This Project',
@@ -127,7 +165,18 @@ const translations: Record<Language, Record<string, string>> = {
     // Language selector
     'language.select': 'Language',
     'language.en': 'English',
-    'language.fr': 'French'
+    'language.fr': 'French',
+    
+    // User melodies
+    'melodies.title': 'Your Registered Melodies',
+    'melodies.connect_wallet': 'Connect your wallet to view your registered melodies.',
+    'melodies.none': 'You haven\'t registered any melodies yet.',
+    'melodies.loading': 'Loading your melodies...',
+    'melodies.melody_number': 'Melody #',
+    'melodies.hash': 'Hash',
+    'melodies.registered_on': 'Registered on',
+    'melodies.view_transaction': 'View Transaction',
+    'melodies.no_transaction': 'Transaction data not available'
   },
   fr: {
     // Header
@@ -200,6 +249,44 @@ const translations: Record<Language, Record<string, string>> = {
     'verify.not_registered': 'Non Enregistré ✗',
     'verify.owner': 'Propriétaire',
     'verify.registered_on': 'Enregistré le',
+    'verify.wallet_connected': 'Portefeuille Connecté',
+    'verify.wallet_not_connected': 'Portefeuille Non Connecté',
+    'verify.clear_logs': 'Effacer les Journaux',
+    'verify.process_log': 'Journal de Processus',
+    'verify.entries': 'entrées',
+    'verify.no_logs': 'Pas encore de journaux',
+    'verify.close': 'Fermer',
+    'verify.hash': 'Hachage',
+    'verify.copy_hash': 'Copier le Hachage',
+    'verify.view_on_etherscan': 'Voir sur Etherscan',
+    'verify.none': 'Aucun',
+    'verify.error_notes': 'Veuillez sélectionner exactement 8 notes pour votre mélodie',
+    'verify.error_salt': 'Veuillez entrer une valeur de sel',
+    'verify.error_salt_format': 'Le sel doit être une valeur numérique valide',
+    'verify.computing_hash': 'Calcul du hachage à partir des notes et du sel...',
+    'verify.notes_midi': 'Notes converties en MIDI',
+    'verify.hash_calculated': 'Hachage calculé',
+    'verify.hash_error': 'Erreur de calcul du hachage',
+    'verify.unknown_error': 'Erreur inconnue',
+    'verify.no_hash': 'Aucun hachage fourni pour la vérification',
+    'verify.verifying_ownership': 'Vérification de la propriété pour le hachage',
+    'verify.no_wallet': 'Aucun portefeuille Ethereum trouvé. Veuillez installer MetaMask.',
+    'verify.connecting': 'Connexion au fournisseur...',
+    'verify.creating_contract': 'Création de l\'instance du contrat...',
+    'verify.querying_owner': 'Interrogation du contrat pour le propriétaire...',
+    'verify.owner_address': 'Adresse du propriétaire',
+    'verify.fetching_timestamp': 'Récupération de l\'horodatage d\'enregistrement...',
+    'verify.registration_time': 'Heure d\'enregistrement',
+    'verify.not_registered': 'La mélodie n\'est pas enregistrée',
+    'verify.verification_error': 'Erreur de vérification',
+    'verify.error_no_hash': 'Veuillez entrer un hachage à vérifier',
+    'verify.using_provided_hash': 'Utilisation du hachage fourni pour la vérification',
+    'verify.computing_from_melody': 'Calcul du hachage à partir de la mélodie et du sel d\'abord',
+    'verify.verification_failed': 'La vérification a échoué',
+    'verify.error': 'Erreur',
+    'verify.hash_copied': 'Hachage copié dans le presse-papiers',
+    'verify.salt_placeholder': 'Entrez la valeur de sel que vous avez utilisée lors de l\'enregistrement',
+    'verify.hash_placeholder': 'Collez le hachage de la mélodie ici',
     
     // About section
     'about.title': 'À Propos de Ce Projet',
@@ -240,7 +327,18 @@ const translations: Record<Language, Record<string, string>> = {
     // Language selector
     'language.select': 'Langue',
     'language.en': 'Anglais',
-    'language.fr': 'Français'
+    'language.fr': 'Français',
+    
+    // User melodies
+    'melodies.title': 'Vos Mélodies Enregistrées',
+    'melodies.connect_wallet': 'Connectez votre portefeuille pour voir vos mélodies enregistrées.',
+    'melodies.none': 'Vous n\'avez pas encore enregistré de mélodies.',
+    'melodies.loading': 'Chargement de vos mélodies...',
+    'melodies.melody_number': 'Mélodie #',
+    'melodies.hash': 'Hachage',
+    'melodies.registered_on': 'Enregistrée le',
+    'melodies.view_transaction': 'Voir la Transaction',
+    'melodies.no_transaction': 'Données de transaction non disponibles'
   }
 };
 
@@ -291,26 +389,23 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
   );
 };
 
-// Custom hook to use the language context
-// src/context/LanguageContext.tsx
-// Update the useLanguage hook to be SSR-safe
-
+// Custom hook to use the language context - SSR-safe version
 export const useLanguage = () => {
-    // Check if we're in a browser environment
-    const isClient = typeof window !== 'undefined';
-    const context = useContext(LanguageContext);
-    
-    // For server-side rendering or when context isn't available yet,
-    // return a fallback context that won't throw errors
-    if (context === undefined) {
-      // If we're on the server or the provider hasn't mounted yet,
-      // return a default implementation that won't break rendering
-      return {
-        language: 'en',
-        setLanguage: () => {}, // No-op function
-        t: (key: string) => key // Return the key itself as fallback
-      };
-    }
-    
-    return context;
-  };
+  // Check if we're in a browser environment
+  const isClient = typeof window !== 'undefined';
+  const context = useContext(LanguageContext);
+  
+  // For server-side rendering or when context isn't available yet,
+  // return a fallback context that won't throw errors
+  if (context === undefined) {
+    // If we're on the server or the provider hasn't mounted yet,
+    // return a default implementation that won't break rendering
+    return {
+      language: 'en',
+      setLanguage: () => {}, // No-op function
+      t: (key: string) => key // Return the key itself as fallback
+    };
+  }
+  
+  return context;
+};
