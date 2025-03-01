@@ -100,7 +100,7 @@ export const getCurrentAccount = async (): Promise<string | null> => {
 /**
  * Registers a melody on the blockchain
  */
-export const registerMelody = async (proof: Proof, melodyHash: string): Promise<ethers.ContractTransaction | boolean> => {
+export const registerMelody = async (proof: any, melodyHash: string): Promise<ethers.ContractTransaction | boolean> => {
   if (typeof window === 'undefined') {
     console.error('Cannot register melody on server side');
     return false;
@@ -130,8 +130,8 @@ export const registerMelody = async (proof: Proof, melodyHash: string): Promise<
     console.log("Preparing to register melody with hash:", melodyHash);
     console.log("Using proof:", JSON.stringify(proof));
     
-    // Format the public input (melodyHash) for the contract
-    const input = [melodyHash];
+    // Format the public input (melodyHash) for the contract - WITH EXPLICIT TYPING
+    const input: [string] = [melodyHash]; // THIS IS THE FIX
     
     console.log("Calling registerMelody on contract...");
     // Register the melody with the proof
@@ -156,7 +156,6 @@ export const registerMelody = async (proof: Proof, melodyHash: string): Promise<
     throw error;
   }
 };
-
 /**
  * Gets all melodies registered by the current user
  */
