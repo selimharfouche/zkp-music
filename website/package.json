@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^1.2.0",
     "circomlibjs": "^0.1.7",
     "ethers": "^5.7.2",
     "jspdf": "^3.0.0",

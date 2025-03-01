@@ -11,6 +11,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import ZkpExplanation from '../components/ZkpExplanation';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function Home() {
   const { theme } = useTheme();
