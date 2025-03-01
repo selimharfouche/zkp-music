@@ -190,7 +190,8 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
         addLog(`${t('verify.registration_time')}: ${date.toLocaleString()}`);
       } else {
         setRegistrationTime('');
-        addLog(t('verify.not_registered'));
+        // Use the new translation key for the log message
+        addLog(t('verify.not_registered_message'));
       }
       
       // Show results
@@ -451,7 +452,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                       <div className="mb-2">
                         <span className={colors.mutedText}>{t('verify.owner')}:</span>
                         <span className={`ml-2 ${colors.text}`}>{formatAddress(ownerAddress)}</span>
-                        <a
+                        
                           href={`https://sepolia.etherscan.io/address/${ownerAddress}`}
                           target="_blank"
                           rel="noopener noreferrer"

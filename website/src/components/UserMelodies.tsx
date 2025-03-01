@@ -157,7 +157,7 @@ const UserMelodies: React.FC<UserMelodiesProps> = ({
                     </div>
                     <div className="mt-2 md:mt-0">
                       {melody.txHash ? (
-                        <a
+                        
                           href={`https://sepolia.etherscan.io/tx/${melody.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
