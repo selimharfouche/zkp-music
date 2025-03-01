@@ -1,7 +1,7 @@
 // website/src/components/Piano.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 interface PianoProps {
@@ -18,73 +18,39 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
   const octave2 = ['C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5'];
   const notes = [...octave1, ...octave2];
   
-  // Theme colors
-  const getThemeColors = () => {
-    if (theme === 'dark') {
-      return {
-        pianoContainer: 'bg-[#3a3a3c]',
-        whiteKeyBase: 'bg-white',
-        whiteKeySelected: 'bg-[#5ac8fa]',
-        blackKeyBase: 'bg-black',
-        blackKeySelected: 'bg-[#0a84ff]',
-        keyBorder: 'border-[#48484a]',
-        text: 'text-white',
-        buttonBg: 'bg-[#ff453a]',
-        buttonHover: 'hover:bg-[#d70015]',
-        mutedText: 'text-[#86868b]'
-      };
-    } else {
-      return {
-        pianoContainer: 'bg-gray-100',
-        whiteKeyBase: 'bg-white',
-        whiteKeySelected: 'bg-blue-300',
-        blackKeyBase: 'bg-black',
-        blackKeySelected: 'bg-blue-600',
-        keyBorder: 'border-gray-300',
-        text: 'text-black',
-        buttonBg: 'bg-red-500',
-        buttonHover: 'hover:bg-red-600',
-        mutedText: 'text-gray-500'
-      };
-    }
-  };
-  
-  const colors = getThemeColors();
-  
   // Determine if a note is a sharp (black key)
   const isSharpNote = (note: string) => note.includes('#');
   
-  const toggleNote = (note: string) => {
-    setSelectedNotes(prev => {
-      // If the note is already selected, remove it
-      if (prev.includes(note)) {
-        return prev.filter(n => n !== note);
-      }
-      
-      // If we've reached the max number of notes, don't add more
-      if (prev.length >= maxNotes) {
-        return prev;
-      }
-      
-      // Add the note
-      return [...prev, note];
-    });
-  };
+  // Use callback to avoid unnecessary re-renders
+  const addNote = useCallback((note: string) => {
+    if (selectedNotes.length >= maxNotes) return;
+    
+    const newNotes = [...selectedNotes, note];
+    setSelectedNotes(newNotes);
+    onNotesChange(newNotes); // Call parent's handler directly with new value
+  }, [selectedNotes, maxNotes, onNotesChange]);
   
-  const clearNotes = () => {
+  const removeLastNote = useCallback(() => {
+    if (selectedNotes.length === 0) return;
+    
+    const newNotes = selectedNotes.slice(0, -1);
+    setSelectedNotes(newNotes);
+    onNotesChange(newNotes); // Call parent's handler directly with new value
+  }, [selectedNotes, onNotesChange]);
+  
+  const clearNotes = useCallback(() => {
     setSelectedNotes([]);
-  };
+    onNotesChange([]); // Call parent's handler directly with new value
+  }, [onNotesChange]);
   
   // Play a note when clicked
   const playNote = (note: string) => {
-    // This is a simple way to play notes. For a more sophisticated approach,
-    // you'd use the Web Audio API or a library like Tone.js
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
-      // Convert note to frequency (simplified)
+      // Convert note to frequency
       const noteMap: Record<string, number> = {
         'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63,
         'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00,
@@ -104,55 +70,51 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
       
       oscillator.start();
       setTimeout(() => oscillator.stop(), 500);
-    } catch (err) {
-      console.error("Error playing note:", err);
+    } catch (error) {
+      console.error("Failed to play note:", error);
     }
   };
   
-  // Update the parent component when the selected notes change
-  useEffect(() => {
-    onNotesChange(selectedNotes);
-  }, [selectedNotes, onNotesChange]);
+  // Count occurrences of each note for highlighting
+  const countNoteOccurrences = (noteToCount: string): number => {
+    return selectedNotes.filter(note => note === noteToCount).length;
+  };
   
   return (
     <div className="mt-6 mb-8">
-      <h3 className={`text-lg font-medium mb-2 ${colors.text}`}>
+      <h3 className={`text-lg font-medium mb-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
         Create Your Melody ({selectedNotes.length}/{maxNotes} notes)
       </h3>
       
-      <div className={`piano-container relative h-40 overflow-x-auto whitespace-nowrap ${colors.pianoContainer} p-4 rounded-lg`}>
+      <div className={`piano-container relative h-40 overflow-x-auto whitespace-nowrap ${theme === 'dark' ? 'bg-[#3a3a3c]' : 'bg-gray-100'} p-4 rounded-lg`}>
         <div className="piano flex h-32">
-          {notes.map((note, index) => {
+          {notes.map((note) => {
             const isSharp = isSharpNote(note);
-            const isSelected = selectedNotes.includes(note);
+            const occurrences = countNoteOccurrences(note);
+            const isSelected = occurrences > 0;
             
             return (
               <div
                 key={note}
                 className={`
-                  ${isSharp 
-                    ? `black-key ${isSelected ? colors.blackKeySelected : colors.blackKeyBase}` 
-                    : `white-key ${isSelected ? colors.whiteKeySelected : colors.whiteKeyBase}`
-                  }
-                  ${isSharp 
-                    ? 'h-20 w-8 -mx-4 z-10' 
-                    : `h-32 w-12 border ${colors.keyBorder}`
-                  }
+                  ${isSharp ? 'black-key' : 'white-key'}
+                  ${isSelected ? (isSharp ? 'bg-[#0a84ff]' : 'bg-[#5ac8fa]') : ''}
+                  ${isSharp ? 'h-20 w-8 -mx-4 z-10 bg-black' : 'h-32 w-12 bg-white border border-[#48484a]'}
                   relative inline-block cursor-pointer transition-colors hover:opacity-90
                 `}
                 onClick={() => {
-                  toggleNote(note);
+                  addNote(note);
                   playNote(note);
                 }}
               >
                 {!isSharp && (
-                  <div className="absolute bottom-2 left-0 right-0 text-center text-xs">
+                  <div className="absolute bottom-2 left-0 right-0 text-center text-xs text-black">
                     {note}
                   </div>
                 )}
-                {isSharp && isSelected && (
-                  <div className="absolute -bottom-5 left-0 right-0 text-center text-xs text-white">
-                    {note}
+                {isSelected && (
+                  <div className={`absolute ${isSharp ? '-bottom-5' : 'top-2'} left-0 right-0 text-center text-xs ${isSharp ? 'text-white' : 'text-black'}`}>
+                    {occurrences > 1 ? `×${occurrences}` : '●'}
                   </div>
                 )}
               </div>
@@ -164,12 +126,25 @@ const Piano: React.FC<PianoProps> = ({ onNotesChange, maxNotes = 8 }) => {
       <div className="mt-4 flex gap-2">
         <button
           onClick={clearNotes}
-          className={`px-4 py-2 ${colors.buttonBg} text-white rounded-lg ${colors.buttonHover} transition-colors cursor-pointer`}
+          className="px-4 py-2 bg-[#ff453a] text-white rounded-lg hover:bg-[#d70015] transition-colors cursor-pointer"
         >
-          Clear Notes
+          Clear All
         </button>
-        <div className={`ml-4 ${colors.mutedText}`}>
-          Selected notes: {selectedNotes.length > 0 ? selectedNotes.join(', ') : 'None'}
+        
+        <button
+          onClick={removeLastNote}
+          disabled={selectedNotes.length === 0}
+          className={`px-4 py-2 ${
+            selectedNotes.length === 0 
+              ? 'bg-gray-500 cursor-not-allowed' 
+              : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+          } text-white rounded-lg transition-colors`}
+        >
+          Delete Last
+        </button>
+        
+        <div className={`ml-4 ${theme === 'dark' ? 'text-[#86868b]' : 'text-gray-500'}`}>
+          Sequence: {selectedNotes.length > 0 ? selectedNotes.join(', ') : 'None'}
         </div>
       </div>
     </div>

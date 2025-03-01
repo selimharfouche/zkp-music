@@ -28,16 +28,18 @@ export default function Home() {
     return {
       bgMain: theme === 'dark' ? 'bg-[#1c1c1e]' : 'bg-[#f2f2f7]',
       bgHeader: theme === 'dark' ? 'bg-[#1c1c1e]' : 'bg-white',
+      bgFooter: theme === 'dark' ? 'bg-[#1c1c1e]' : 'bg-white',
       borderColor: theme === 'dark' ? 'border-[#38383a]' : 'border-gray-200',
       text: theme === 'dark' ? 'text-white' : 'text-black',
-      mutedText: theme === 'dark' ? 'text-[#86868b]' : 'text-gray-500'
+      mutedText: theme === 'dark' ? 'text-[#86868b]' : 'text-gray-500',
+      bgAbout: theme === 'dark' ? 'bg-[#2c2c2e]' : 'bg-white'
     };
   };
   
   const colors = getThemeClasses();
   
   return (
-    <main className={`min-h-screen ${colors.bgMain} transition-colors duration-300`}>
+    <main className={`min-h-screen ${colors.bgMain} transition-colors duration-300 pb-20`}>
       <header className={`${colors.bgHeader} ${colors.text} py-6 border-b ${colors.borderColor} transition-colors duration-300`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div>
@@ -66,7 +68,7 @@ export default function Home() {
           
           <FinalVerification isWalletConnected={walletConnected} />
           
-          <div className={`${theme === 'dark' ? 'bg-[#2c2c2e]' : 'bg-white'} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
+          <div className={`${colors.bgAbout} p-6 rounded-lg shadow-lg ${colors.text} transition-colors duration-300`}>
             <h2 className="text-2xl font-bold mb-4">About This Project</h2>
             <div className="prose prose-invert">
               <p className={colors.mutedText}>
@@ -98,7 +100,7 @@ export default function Home() {
         </div>
       </div>
       
-      <footer className={`${colors.bgHeader} ${colors.text} py-6 mt-8 border-t ${colors.borderColor} transition-colors duration-300`}>
+      <footer className={`${colors.bgFooter} ${colors.text} py-6 mt-8 border-t ${colors.borderColor} transition-colors duration-300`}>
         <div className="container mx-auto px-4 text-center">
           <p className={colors.mutedText}>&copy; 2025 Music ZKP Project</p>
           <p className={`mt-2 ${colors.mutedText}`}>
@@ -108,4 +110,4 @@ export default function Home() {
       </footer>
     </main>
   );
-}
+};

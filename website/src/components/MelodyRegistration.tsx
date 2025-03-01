@@ -19,14 +19,14 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
   onRegistrationSuccess
 }) => {
   const { theme } = useTheme();
+  
   const [notes, setNotes] = useState<string[]>([]);
   const [melodyName, setMelodyName] = useState('');
   const [currentSalt, setCurrentSalt] = useState<bigint | null>(null);
   const [melodyHash, setMelodyHash] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [progressPercent, setProgressPercent] = useState(0);
+  const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [showOwnershipAlert, setShowOwnershipAlert] = useState(false);
   const [ownershipData, setOwnershipData] = useState<any>(null);
   
@@ -37,12 +37,10 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         bgCard: 'bg-[#2c2c2e]',
         text: 'text-white',
         mutedText: 'text-[#86868b]',
-        bgInput: 'bg-[#3a3a3c]',
-        bgProgress: 'bg-[#48484a]',
-        progressBar: 'bg-[#0a84ff]',
+        inputBg: 'bg-[#3a3a3c]',
         border: 'border-[#48484a]',
-        errorBg: 'bg-[#3a3a3c]',
-        successBg: 'bg-[#3a3a3c]',
+        alertBg: 'bg-[#3a3a3c]',
+        statusBg: 'bg-[#1c1c1e]',
         buttonBg: 'bg-[#0a84ff]',
         buttonHover: 'hover:bg-[#0070d8]'
       };
@@ -51,12 +49,10 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         bgCard: 'bg-white',
         text: 'text-black',
         mutedText: 'text-gray-500',
-        bgInput: 'bg-gray-100',
-        bgProgress: 'bg-gray-200',
-        progressBar: 'bg-blue-500',
+        inputBg: 'bg-gray-100',
         border: 'border-gray-200',
-        errorBg: 'bg-red-50',
-        successBg: 'bg-green-50',
+        alertBg: 'bg-gray-100',
+        statusBg: 'bg-gray-50',
         buttonBg: 'bg-blue-500',
         buttonHover: 'hover:bg-blue-600'
       };
@@ -65,17 +61,19 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
   
   const colors = getThemeClasses();
   
-  // Handle notes change from piano
   const handleNotesChange = (newNotes: string[]) => {
     setNotes(newNotes);
     setError(null);
-    setStatusMessage(null);
-    setProgressPercent(0);
+    setStatusMessages([]);
     setMelodyHash(null);
     setCurrentSalt(null);
   };
   
-  // Register melody workflow
+  // Safely add a message without causing loops
+  const appendMessage = useCallback((emoji: string, message: string) => {
+    setStatusMessages(prev => [...prev, `${emoji} ${message}`]);
+  }, []);
+  
   const registerMelodyFlow = useCallback(async () => {
     // Validation checks
     if (!isWalletConnected) {
@@ -96,56 +94,56 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
     // Start processing
     setIsProcessing(true);
     setError(null);
-    setStatusMessage('Starting melody registration...');
-    setProgressPercent(5);
+    setStatusMessages([]); // Clear previous messages
+    
+    // Define all messages upfront to avoid state updates in the process flow
+    let allMessages = [];
     
     try {
-      // STEP 1: Generate a random salt (10%)
-      setStatusMessage('Generating random salt...');
-      setProgressPercent(10);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for visibility
+      // STEP 1: Generate a random salt
+      allMessages.push('🔑 Generating random salt for your melody...');
+      setStatusMessages(allMessages); // Update messages once
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       const salt = generateSalt();
       setCurrentSalt(salt);
-      console.log("Generated salt:", salt.toString());
       
-      // STEP 2: Convert notes to MIDI (20%)
-      setStatusMessage('Converting notes to MIDI values...');
-      setProgressPercent(20);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // STEP 2: Convert notes to MIDI
+      allMessages.push('🎹 Converting your notes to MIDI values...');
+      setStatusMessages(allMessages); // Update messages once
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       const midiNotes = notesToMIDI(notes);
-      console.log("MIDI notes:", midiNotes);
       
-      // STEP 3: Calculate hash (40%)
-      setStatusMessage('Computing secure hash of your melody...');
-      setProgressPercent(40);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // STEP 3: Calculate hash
+      allMessages.push('🔐 Computing cryptographic hash of your melody...');
+      setStatusMessages(allMessages); // Update messages once
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const hash = await calculateMelodyHash(midiNotes, salt);
       setMelodyHash(hash);
-      console.log("✅ Melody Hash:", hash);
+      allMessages.push('✓ Hash created successfully!');
+      setStatusMessages(allMessages); // Update messages once
       
-      // STEP 4: Generate proof (70%)
-      setStatusMessage('Generating zero-knowledge proof...');
-      setProgressPercent(70);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // STEP 4: Generate proof
+      allMessages.push('🧮 Generating zero-knowledge proof...');
+      setStatusMessages(allMessages); // Update messages once
+      await new Promise(resolve => setTimeout(resolve, 1200));
       
       const proof = await generateProof(midiNotes, salt, hash);
-      console.log("Proof generated successfully");
+      allMessages.push('✓ Mathematical proof generated!');
+      setStatusMessages(allMessages); // Update messages once
       
-      // STEP 5: Submit to blockchain (90%)
-      setStatusMessage('Submitting to blockchain...');
-      setProgressPercent(90);
+      // STEP 5: Submit to blockchain
+      allMessages.push('⛓️ Sending to blockchain (check your wallet)...');
+      setStatusMessages(allMessages); // Update messages once
       
       try {
         const txResult = await registerMelody(proof, hash);
-        console.log("Transaction result:", txResult);
         
-        // STEP 6: Completion (100%)
-        setProgressPercent(100);
-        setStatusMessage('✅ Melody registered successfully on the blockchain!');
-        console.log("Melody registered successfully with hash:", hash);
+        // STEP 6: Completion
+        allMessages.push('🎉 Melody registered successfully on the blockchain!');
+        setStatusMessages(allMessages); // Update messages once
         
         if (onRegistrationSuccess) {
           onRegistrationSuccess(hash);
@@ -155,7 +153,8 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         let txHash = '';
         if (typeof txResult === 'object' && txResult.hash) {
           txHash = txResult.hash;
-          console.log("Transaction hash saved:", txHash);
+          allMessages.push(`🔍 Transaction ID: ${txHash.substring(0, 10)}...`);
+          setStatusMessages(allMessages); // Final update
         }
         
         // Save ownership data locally
@@ -177,16 +176,18 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         });
         
         // Show the ownership alert
-        setShowOwnershipAlert(true);
+        setTimeout(() => {
+          setShowOwnershipAlert(true);
+        }, 1000);
       } catch (txError: any) {
         console.error("Transaction error:", txError);
+        allMessages.push('❌ Transaction failed. Please try again.');
+        setStatusMessages(allMessages); // Update with error
         throw new Error(`Blockchain transaction failed: ${txError.message || 'Unknown error'}`);
       }
     } catch (err: any) {
       console.error('Error in melody registration flow:', err);
       setError(err.message || 'Failed to register melody');
-      setStatusMessage(null);
-      setProgressPercent(0);
     } finally {
       setIsProcessing(false);
     }
@@ -205,7 +206,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
           id="melodyName"
           value={melodyName}
           onChange={(e) => setMelodyName(e.target.value)}
-          className={`w-full px-4 py-2 border ${colors.border} rounded-lg ${colors.bgInput} ${colors.text} focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
+          className={`w-full px-4 py-2 border ${colors.border} rounded-lg ${colors.inputBg} ${colors.text} focus:outline-none focus:ring-2 focus:ring-[#0a84ff]`}
           placeholder="Enter a name for your melody"
           disabled={isProcessing}
         />
@@ -214,55 +215,35 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
       <Piano onNotesChange={handleNotesChange} maxNotes={8} />
       
       {error && (
-        <div className={`p-4 mb-4 ${colors.errorBg} border-l-4 border-red-500 rounded-md ${colors.text}`}>
+        <div className={`p-4 mb-4 ${colors.alertBg} border-l-4 border-red-500 rounded-md ${colors.text}`}>
           {error}
         </div>
       )}
       
-      {/* Progress Indicator */}
-      {(isProcessing) && statusMessage && (
-        <div className={`mt-4 mb-4 p-4 ${colors.bgInput} border ${colors.border} rounded-lg`}>
-          <div className="flex items-center">
-            <div className="mr-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-            </div>
-            <div className={colors.text + " font-medium"}>{statusMessage}</div>
+      {/* Status Messages with Emojis */}
+      {statusMessages.length > 0 && (
+        <div className={`my-4 p-4 rounded-lg ${colors.statusBg} border ${colors.border}`}>
+          <h3 className={`font-medium mb-2 ${colors.text}`}>Registration Progress:</h3>
+          <div className="space-y-2">
+            {statusMessages.map((msg, index) => (
+              <div key={index} className={`${colors.text} flex items-start`}>
+                <span className="mr-2 text-xl">{msg.substring(0, 2)}</span>
+                <span className="pt-1">{msg.substring(2)}</span>
+              </div>
+            ))}
           </div>
-          
-          {progressPercent > 0 && (
-            <div className="mt-3">
-              <div className={`w-full ${colors.bgProgress} rounded-full h-3`}>
-                <div 
-                  className={`${colors.progressBar} h-3 rounded-full transition-all duration-500 flex items-center justify-end`}
-                  style={{ width: `${progressPercent}%` }}
-                >
-                  <span className="px-2 text-xs text-white">{progressPercent}%</span>
-                </div>
-              </div>
-              <div className={`flex justify-between mt-1 text-xs ${colors.mutedText}`}>
-                <span>Start</span>
-                <span>Salt</span>
-                <span>Hash</span>
-                <span>Proof</span>
-                <span>Register</span>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Success Message (only when not processing) */}
-      {!isProcessing && statusMessage && progressPercent === 100 && (
-        <div className={`p-4 mb-4 ${colors.successBg} border-l-4 border-green-500 rounded-md ${colors.text}`}>
-          {statusMessage}
         </div>
       )}
       
       <div className="mt-6">
         <button
           onClick={registerMelodyFlow}
-          disabled={isProcessing} 
-          className={`w-full px-6 py-3 rounded-lg ${colors.text} font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a84ff] ${colors.buttonBg} ${colors.buttonHover} transition-all duration-300 shadow-md cursor-pointer`}
+          disabled={isProcessing || !isWalletConnected || notes.length !== 8 || !melodyName.trim()} 
+          className={`w-full px-6 py-3 rounded-lg text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a84ff] ${colors.buttonBg} ${colors.buttonHover} transition-all duration-300 shadow-md cursor-pointer ${
+            isProcessing || !isWalletConnected || notes.length !== 8 || !melodyName.trim() 
+              ? 'opacity-70 cursor-not-allowed' 
+              : ''
+          }`}
         >
           {isProcessing ? (
             <span className="flex items-center justify-center">
@@ -273,7 +254,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         </button>
         
         {/* Debug info to see what's causing the button to be disabled */}
-        <div className={`mt-2 p-3 ${colors.bgInput} rounded-lg text-xs ${colors.mutedText}`}>
+        <div className={`mt-2 p-3 ${colors.alertBg} rounded-lg text-xs ${colors.mutedText}`}>
           <div>Notes: {notes.length}/8 {notes.length === 8 ? "✅" : "❌"}</div>
           <div>Wallet connected: {isWalletConnected ? "✅" : "❌"}</div>
           <div>Melody name: {melodyName.trim() ? "✅" : "❌"}</div>
@@ -281,7 +262,7 @@ const MelodyRegistration: React.FC<MelodyRegistrationProps> = ({
         </div>
       </div>
       
-      <div className={`mt-6 text-sm ${colors.mutedText} ${colors.bgInput} p-4 rounded-lg`}>
+      <div className={`mt-6 text-sm ${colors.mutedText} ${colors.alertBg} p-4 rounded-lg`}>
         <p className={`font-medium mb-2 ${colors.text}`}>How it works:</p>
         <ol className="list-decimal ml-5 space-y-1">
           <li>Create an 8-note melody using the piano keyboard</li>
