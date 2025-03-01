@@ -9,6 +9,13 @@ import { notesToMIDI, calculateMelodyHash } from '../utils/zkpUtils';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
+// Make sure ethers is imported properly
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 interface FinalVerificationProps {
   isWalletConnected: boolean;
 }
