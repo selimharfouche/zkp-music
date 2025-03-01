@@ -1,12 +1,22 @@
-// website/src/utils/zkpUtils.ts
-// Zero-knowledge proof utility functions for hashing and proof generation
+// src/utils/zkpUtils.ts
 
-// Dynamic imports of libraries
-let snarkjs: any;
-let circomlibjs: any;
+// Add explicit 'any' type declarations for the modules
+declare module 'snarkjs' {
+  const content: any;
+  export = content;
+}
+
+declare module 'circomlibjs' {
+  const content: any;
+  export = content;
+}
+
+// Declare variables with proper types
+let snarkjs: any = null;
+let circomlibjs: any = null;
 
 // Dynamically import libraries on client side
-const loadLibraries = async () => {
+const loadLibraries = async (): Promise<void> => {
   if (typeof window !== 'undefined') {
     if (!snarkjs) {
       snarkjs = await import('snarkjs');
@@ -29,10 +39,6 @@ export const calculateMelodyHash = async (melody: number[], salt: bigint): Promi
     const poseidon = await circomlibjs.buildPoseidon();
     console.log("Poseidon hasher loaded");
     
-    if (!poseidon) {
-      throw new Error("Failed to initialize Poseidon hasher");
-    }
-    
     // Prepare inputs (melody + salt)
     const hashInputs = [...melody.map(n => BigInt(n)), salt];
     console.log("Hash inputs prepared:", hashInputs.map(n => n.toString()));
@@ -41,17 +47,9 @@ export const calculateMelodyHash = async (melody: number[], salt: bigint): Promi
     const hashResult = poseidon(hashInputs);
     console.log("Raw hash result obtained");
     
-    if (!hashResult) {
-      throw new Error("Hash calculation failed");
-    }
-    
     // Convert to string
     const hash = poseidon.F.toString(hashResult);
     console.log("Final hash:", hash);
-    
-    if (!hash || hash.length === 0) {
-      throw new Error("Hash conversion to string failed");
-    }
     
     return hash;
   } catch (error) {
@@ -90,7 +88,11 @@ export const generateProof = async (
   melody: number[], 
   salt: bigint, 
   melodyHash: string
-): Promise<any> => {
+): Promise<{
+  a: [string, string];
+  b: [[string, string], [string, string]];
+  c: [string, string];
+}> => {
   await loadLibraries();
   
   // Create input for the proof
@@ -102,7 +104,7 @@ export const generateProof = async (
   
   try {
     // Generate the proof
-    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+    const { proof, publicSignals: _publicSignals } = await snarkjs.groth16.fullProve(
       input,
       '/circuits/melody_proof.wasm',
       '/circuits/melody_proof_final.zkey'
