@@ -88,20 +88,20 @@ const OwnershipProofAlert: React.FC<OwnershipProofAlertProps> = ({
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      // Colors
-      const primaryColor = [0, 101, 163];  // Blue
-      const accentColor = [227, 169, 15];  // Gold
-      const darkText = [51, 51, 51];       // Near-black
-      const lightText = [102, 102, 102];   // Gray
-      const criticalColor = [255, 248, 225]; // Light yellow for highlighting
-      const criticalBorder = [237, 162, 12]; // Darker yellow for border
+      // Colors with proper tuple types
+      const primaryColor: [number, number, number] = [0, 101, 163];  // Blue
+      const accentColor: [number, number, number] = [227, 169, 15];  // Gold
+      const darkText: [number, number, number] = [51, 51, 51];       // Near-black
+      const lightText: [number, number, number] = [102, 102, 102];   // Gray
+      const criticalColor: [number, number, number] = [255, 248, 225]; // Light yellow for highlighting
+      const criticalBorder: [number, number, number] = [237, 162, 12]; // Darker yellow for border
       
       // Background
       doc.setFillColor(255, 255, 255);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       
       // Decorative top and bottom borders
-      doc.setDrawColor(0, 101, 163);
+      doc.setDrawColor(...primaryColor);
       doc.setLineWidth(3);
       doc.line(15, 12, pageWidth - 15, 12);
       doc.line(15, pageHeight - 12, pageWidth - 15, pageHeight - 12);
@@ -146,8 +146,8 @@ const OwnershipProofAlert: React.FC<OwnershipProofAlertProps> = ({
       const leftMargin = 25;
       const labelWidth = 45;
       
-      // Function to add fields to the certificate
-      const addField = (label, value, isHighlighted = false) => {
+      // Function to add fields to the certificate - with proper type annotations
+      const addField = (label: string, value: string, isHighlighted: boolean = false) => {
         // Field label
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...primaryColor);
@@ -281,7 +281,6 @@ const OwnershipProofAlert: React.FC<OwnershipProofAlertProps> = ({
       
       // Save the PDF
       doc.save(`melody-certificate-${melodyData.name.replace(/\s+/g, '-')}.pdf`);
-  
     } catch (error) {
       console.error('Error generating PDF certificate:', error);
       alert('Failed to generate PDF certificate. Please try again.');
