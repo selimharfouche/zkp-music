@@ -1,22 +1,15 @@
 // src/utils/zkpUtils.ts
 
-// Add explicit 'any' type declarations for the modules
-declare module 'snarkjs' {
-  const content: any;
-  export = content;
-}
+// Simple module declarations at the top of the file
+declare module 'snarkjs';
+declare module 'circomlibjs';
 
-declare module 'circomlibjs' {
-  const content: any;
-  export = content;
-}
-
-// Declare variables with proper types
+// Existing code with typing
 let snarkjs: any = null;
 let circomlibjs: any = null;
 
-// Dynamically import libraries on client side
-const loadLibraries = async (): Promise<void> => {
+// Rest of your functions remain the same
+const loadLibraries = async () => {
   if (typeof window !== 'undefined') {
     if (!snarkjs) {
       snarkjs = await import('snarkjs');
@@ -88,11 +81,7 @@ export const generateProof = async (
   melody: number[], 
   salt: bigint, 
   melodyHash: string
-): Promise<{
-  a: [string, string];
-  b: [[string, string], [string, string]];
-  c: [string, string];
-}> => {
+) => {
   await loadLibraries();
   
   // Create input for the proof
@@ -104,7 +93,7 @@ export const generateProof = async (
   
   try {
     // Generate the proof
-    const { proof, publicSignals: _publicSignals } = await snarkjs.groth16.fullProve(
+    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
       input,
       '/circuits/melody_proof.wasm',
       '/circuits/melody_proof_final.zkey'
