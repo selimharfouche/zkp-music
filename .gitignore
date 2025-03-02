@@ -33,7 +33,7 @@ website/.next/
 website/out/
 website/build/
 website/.vercel/
-website/public/circuits/
+#website/public/circuits/
 
 # Coverage directory used by tools like istanbul
 coverage/
