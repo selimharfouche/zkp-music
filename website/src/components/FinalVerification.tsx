@@ -452,7 +452,7 @@ const FinalVerification: React.FC<FinalVerificationProps> = ({ isWalletConnected
                       <div className="mb-2">
                         <span className={colors.mutedText}>{t('verify.owner')}:</span>
                         <span className={`ml-2 ${colors.text}`}>{formatAddress(ownerAddress)}</span>
-                        
+                        <a
                           href={`https://sepolia.etherscan.io/address/${ownerAddress}`}
                           target="_blank"
                           rel="noopener noreferrer"
